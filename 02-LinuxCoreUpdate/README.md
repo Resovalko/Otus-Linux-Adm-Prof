@@ -1,4 +1,4 @@
-Обновление ядра CentOS8 Steam на основе учебной методички (С использованием Vagrant и VirtualBox)
+##Обновление ядра CentOS8 Stream на основе учебной методички (С использованием Vagrant и VirtualBox)
 
 Смотрю версию ядра
 [vagrant@kernel-update ~]$ uname -msr
