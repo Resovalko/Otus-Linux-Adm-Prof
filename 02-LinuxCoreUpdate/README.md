@@ -68,10 +68,9 @@
 Полностью обновляю систему
 > root@Otus-debian:~# apt update && apt upgrade
 
-Импортирую ключ репозитория
+Импортирую ключ репозитория  
 > root@Otus-debian:~# curl -fsSL https://pkgs.zabbly.com/key.asc | gpg --show-keys --fingerprint  
-
-> root@Otus-debian:~# curl -fsSL https://pkgs.zabbly.com/key.asc -o /etc/apt/keyrings/zabbly.asc
+> root@Otus-debian:~# curl -fsSL https://pkgs.zabbly.com/key.asc -o /etc/apt/keyrings/zabbly.asc  
 
 Добавляю репозиторий
 ```
