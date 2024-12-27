@@ -28,7 +28,7 @@
 > [vagrant@kernel-update ~]$ sudo reboot
 
 Смотрю версию ядра
-> [vagrant@kernel-update ~]$ uname -rms
+> [vagrant@kernel-update ~]$ uname -rms  
 > Linux 6.12.6-1.el8.elrepo.x86_64 x86_64
 
 ## Обновление ядра Debian 12 Bookworm
@@ -38,7 +38,7 @@
 > root@Otus-debian:~# apt update && apt upgrade
 
 Смотрю версию ядра
-> root@Otus-debian:~# uname -rms
+> root@Otus-debian:~# uname -rms  
 > Linux 6.1.0-28-amd64 x86_64
 
 Добавляю репозиторий
@@ -60,7 +60,7 @@
 > root@Otus-debian:~# reboot
 
 Захожу и проверяю версию ядра
-> root@Otus-debian:~# uname -rms
+> root@Otus-debian:~# uname -rms  
 > Linux 6.11.10+bpo-amd64 x86_64
 
 ### Метод 2 (Linux Zabbly APT)
@@ -70,6 +70,7 @@
 
 Импортирую ключ репозитория  
 > root@Otus-debian:~# curl -fsSL https://pkgs.zabbly.com/key.asc | gpg --show-keys --fingerprint  
+
 > root@Otus-debian:~# curl -fsSL https://pkgs.zabbly.com/key.asc -o /etc/apt/keyrings/zabbly.asc  
 
 Добавляю репозиторий
@@ -95,7 +96,7 @@ EOF'
 > root@Otus-debian:~# reboot
 
 Захожу и проверяю версию ядра
-> root@Otus-debian:~# uname -rms
+> root@Otus-debian:~# uname -rms  
 > Linux 6.12.6-zabbly+ x86_64
 
 
