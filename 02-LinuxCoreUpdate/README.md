@@ -10,8 +10,9 @@
 > [vagrant@kernel-update ~]$ sudo yum update -y  
 
 Смотрю какие ядра в системе
+```
 [vagrant@kernel-update ~]$ rpm -qa | grep kernel-
-
+```
 Ставлю репозиторий ELRepo, импортирую публичный ключ:
 [vagrant@kernel-update ~]$ sudo rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
 
