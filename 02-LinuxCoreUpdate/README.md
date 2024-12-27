@@ -10,27 +10,26 @@
 > [vagrant@kernel-update ~]$ sudo yum update -y  
 
 Смотрю какие ядра в системе
-```
-[vagrant@kernel-update ~]$ rpm -qa | grep kernel-
-```
+> [vagrant@kernel-update ~]$ rpm -qa | grep kernel-
+
 Ставлю репозиторий ELRepo, импортирую публичный ключ:
-[vagrant@kernel-update ~]$ sudo rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+> [vagrant@kernel-update ~]$ sudo rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
 
 Устанавливаю репозиторий ELRepo для RHEL-8:
-[vagrant@kernel-update ~]$ sudo yum install https://www.elrepo.org/elrepo-release-8.el8.elrepo.noarch.rpm
+> [vagrant@kernel-update ~]$ sudo yum install https://www.elrepo.org/elrepo-release-8.el8.elrepo.noarch.rpm
 
 Смотрю список доступных ядер
-[vagrant@kernel-update ~]$ yum list available --disablerepo='*' --enablerepo=elrepo-kernel
+> [vagrant@kernel-update ~]$ yum list available --disablerepo='*' --enablerepo=elrepo-kernel
 
 Устанавливаю новую версию ядра
-[vagrant@kernel-update ~]$ sudo yum --enablerepo=elrepo-kernel install kernel-ml
+> [vagrant@kernel-update ~]$ sudo yum --enablerepo=elrepo-kernel install kernel-ml
 
 Перезагружаю систему
-[vagrant@kernel-update ~]$ sudo reboot
+> [vagrant@kernel-update ~]$ sudo reboot
 
 Смотрю версию ядра
-[vagrant@kernel-update ~]$ uname -rms
-Linux 6.12.6-1.el8.elrepo.x86_64 x86_64
+> [vagrant@kernel-update ~]$ uname -rms
+> Linux 6.12.6-1.el8.elrepo.x86_64 x86_64
 
 ### Debian 12
 
