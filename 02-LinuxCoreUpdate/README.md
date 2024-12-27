@@ -32,7 +32,7 @@
 > Linux 6.12.6-1.el8.elrepo.x86_64 x86_64
 
 ## Обновление ядра Debian 12 Bookworm
-# Метод 1
+### Метод 1
 
 Полностью обновляю систему
 > root@Otus-debian:~# apt update && apt upgrade
@@ -63,7 +63,7 @@
 > root@Otus-debian:~# uname -rms
 > Linux 6.11.10+bpo-amd64 x86_64
 
-# Метод 2 (Linux Zabbly APT)
+### Метод 2 (Linux Zabbly APT)
 
 Полностью обновляю систему
 > root@Otus-debian:~# apt update && apt upgrade
@@ -73,17 +73,18 @@
 > root@Otus-debian:~# curl -fsSL https://pkgs.zabbly.com/key.asc -o /etc/apt/keyrings/zabbly.asc
 
 Добавляю репозиторий
-> root@Otus-debian:~# sh -c 'cat <<EOF > /etc/apt/sources.list.d/zabbly-kernel-stable.sources
-> Enabled: yes
-> Types: deb
-> URIs: https://pkgs.zabbly.com/kernel/stable
-> Suites: $(. /etc/os-release && echo ${VERSION_CODENAME})
-> Components: main
-> Architectures: $(dpkg --print-architecture)
-> Signed-By: /etc/apt/keyrings/zabbly.asc
-> 
-> EOF'
+```
+root@Otus-debian:~# sh -c 'cat <<EOF > /etc/apt/sources.list.d/zabbly-kernel-stable.sources
+Enabled: yes
+Types: deb
+URIs: https://pkgs.zabbly.com/kernel/stable
+Suites: $(. /etc/os-release && echo ${VERSION_CODENAME})
+Components: main
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/zabbly.asc
 
+EOF'
+```
 Обновляю список доступных пакетов
 > root@Otus-debian:~# apt update
 
