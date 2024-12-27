@@ -55,7 +55,7 @@
 > [vagrant@kernel-update ~]$ uname -rms  
 > Linux 6.12.6-1.el8.elrepo.x86_64 x86_64
 
-## Обновление ядра Debian 12 Bookworm
+## Обновление ядра Debian 12 Bookworm (на "виртуальной машине 2")
 ### Метод 1
 
 Полностью обновляю систему
