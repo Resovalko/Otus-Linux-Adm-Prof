@@ -1,3 +1,24 @@
+# Рабочее пространство
+Система виртуализации PROXMOX 8.3.1
+
+## Виртуальная машина 1
+> Ubuntu 22.04.5 LTS x86_64  
+> CPU: host (Intel i7-7700)  
+> Sockets: 4  
+> Memory: 4096  
+> Hard disk: 32G  
+> BIOS: SeaBIOS  
+> Machine: i440fx  
+
+## Виртуальная машина 2
+> Debian GNU/Linux 12 (bookworm)  
+> CPU: x86-64-v2-AES  
+> Sockets: 2  
+> Memory: 1024  
+> Hard disk: 32G  
+> BIOS: SeaBIOS  
+> Machine: i440fx  
+
 ## Обновление ядра CentOS8 Stream на основе учебной методички (с использованием Vagrant и VirtualBox)
 
 Смотрю версию ядра  
