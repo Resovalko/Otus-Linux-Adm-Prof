@@ -10,6 +10,9 @@
 > BIOS: SeaBIOS  
 > Machine: i440fx  
 
+> Vagrant 2.4.3  
+> Oracle VM VirtualBox VM Selector v7.0.22  
+
 ## Виртуальная машина 2
 > Debian GNU/Linux 12 (bookworm)  
 > CPU: x86-64-v2-AES  
