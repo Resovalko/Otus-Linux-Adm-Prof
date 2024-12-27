@@ -1,13 +1,13 @@
-## Обновление ядра CentOS8 Stream на основе учебной методички (С использованием Vagrant и VirtualBox)
+# Обновление ядра CentOS8 Stream на основе учебной методички (с использованием Vagrant и VirtualBox)
 
-Смотрю версию ядра
-[vagrant@kernel-update ~]$ uname -msr
-Linux 4.18.0-516.el8.x86_64 x86_64
+Смотрю версию ядра  
+[vagrant@kernel-update ~]$ uname -msr  
+Linux 4.18.0-516.el8.x86_64 x86_64  
 
-Обновляю ссылокы на репозитории
-[vagrant@kernel-update ~]$ sudo sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
-[vagrant@kernel-update ~]$ sudo sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
-[vagrant@kernel-update ~]$ sudo yum update -y
+Обновляю ссылокы на репозитории  
+[vagrant@kernel-update ~]$ sudo sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*  
+[vagrant@kernel-update ~]$ sudo sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*  
+[vagrant@kernel-update ~]$ sudo yum update -y  
 
 Смотрю какие ядра в системе
 [vagrant@kernel-update ~]$ rpm -qa | grep kernel-
@@ -30,3 +30,7 @@ Linux 4.18.0-516.el8.x86_64 x86_64
 Смотрю версию ядра
 [vagrant@kernel-update ~]$ uname -rms
 Linux 6.12.6-1.el8.elrepo.x86_64 x86_64
+
+# Debian 12
+
+
