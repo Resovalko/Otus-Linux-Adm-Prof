@@ -23,7 +23,7 @@
 > Machine: i440fx  
 
 ### Виртуальная машина 3
-> Ubuntu 24.04.1 LTS x86_64 Server
+> Ubuntu 24.04.1 LTS x86_64 Server  
 > CPU: x86-64-v2-AES  
 > Sockets: 2  
 > Memory: 1024  
@@ -143,8 +143,11 @@ EOF'
 
 Скачиваю необходимые файлы с сайта https://kernel.ubuntu.com  
 > root@otusu24srv:~# wget https://kernel.ubuntu.com/mainline/v6.12/amd64/linux-headers-6.12.0-061200-generic_6.12.0-061200.202411220723_amd64.deb  
+
 > root@otusu24srv:~# wget https://kernel.ubuntu.com/mainline/v6.12/amd64/linux-headers-6.12.0-061200_6.12.0-061200.202411220723_all.deb  
+
 > root@otusu24srv:~# wget https://kernel.ubuntu.com/mainline/v6.12/amd64/linux-image-unsigned-6.12.0-061200-generic_6.12.0-061200.202411220723_amd64.deb  
+
 > root@otusu24srv:~# wget https://kernel.ubuntu.com/mainline/v6.12/amd64/linux-modules-6.12.0-061200-generic_6.12.0-061200.202411220723_amd64.deb  
 
 Устанавливаю скачанные пакеты  
