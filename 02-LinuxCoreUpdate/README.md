@@ -2,7 +2,7 @@
 Система виртуализации PROXMOX 8.3.1
 
 ### Виртуальная машина 1
-> Ubuntu 22.04.5 LTS x86_64  
+> Ubuntu 22.04.5 LTS x86_64 Desktop
 > CPU: host (Intel i7-7700)  
 > Sockets: 4  
 > Memory: 4096  
@@ -15,6 +15,15 @@
 
 ### Виртуальная машина 2
 > Debian GNU/Linux 12 (bookworm)  
+> CPU: x86-64-v2-AES  
+> Sockets: 2  
+> Memory: 1024  
+> Hard disk: 32G  
+> BIOS: SeaBIOS  
+> Machine: i440fx  
+
+### Виртуальная машина 3
+> Ubuntu 24.04.1 LTS x86_64 Server
 > CPU: x86-64-v2-AES  
 > Sockets: 2  
 > Memory: 1024  
@@ -123,6 +132,30 @@ EOF'
 > root@Otus-debian:~# uname -rms  
 > Linux 6.12.6-zabbly+ x86_64
 
+## Обновление ядра Ubuntu 24 (на "виртуальной машине 3")
+
+Смотрю версию ядра  
+> root@otusu24srv:~# uname -rms  
+> Linux 6.8.0-51-generic x86_64  
+
+Полностью обновляю систему  
+> root@otusu24srv:~# apt update && apt upgrade -y  
+
+Скачиваю необходимые файлы с сайта https://kernel.ubuntu.com  
+> root@otusu24srv:~# wget https://kernel.ubuntu.com/mainline/v6.12/amd64/linux-headers-6.12.0-061200-generic_6.12.0-061200.202411220723_amd64.deb  
+> root@otusu24srv:~# wget https://kernel.ubuntu.com/mainline/v6.12/amd64/linux-headers-6.12.0-061200_6.12.0-061200.202411220723_all.deb  
+> root@otusu24srv:~# wget https://kernel.ubuntu.com/mainline/v6.12/amd64/linux-image-unsigned-6.12.0-061200-generic_6.12.0-061200.202411220723_amd64.deb  
+> root@otusu24srv:~# wget https://kernel.ubuntu.com/mainline/v6.12/amd64/linux-modules-6.12.0-061200-generic_6.12.0-061200.202411220723_amd64.deb  
+
+Устанавливаю скачанные пакеты  
+> root@otusu24srv:~# dpkg -i linux-*  
+
+Перезагружаюсь  
+> root@otusu24srv:~# reboot  
+
+Захожу и проверяю версию ядра  
+> root@otusu24srv:~# uname -rms  
+> Linux 6.12.0-061200-generic x86_64  
 
 
 
