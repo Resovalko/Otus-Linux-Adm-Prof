@@ -1,5 +1,5 @@
 # Рабочее пространство
-Система виртуализации PROXMOX 8.3.1
+Система виртуализации **PROXMOX 8.3.1**
 
 ### Виртуальная машина 1
 > Ubuntu 22.04.5 LTS x86_64 Desktop
@@ -12,6 +12,7 @@
 
 > Vagrant 2.4.3  
 > Oracle VM VirtualBox VM Selector v7.0.22  
+> ansible 2.10.8  
 
 ### Виртуальная машина 2
 > Debian GNU/Linux 12 (bookworm)  
@@ -159,6 +160,3 @@ EOF'
 Захожу и проверяю версию ядра  
 > root@otusu24srv:~# uname -rms  
 > Linux 6.12.0-061200-generic x86_64  
-
-
-
