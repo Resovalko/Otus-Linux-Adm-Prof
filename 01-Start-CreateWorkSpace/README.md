@@ -61,15 +61,19 @@ Linux ubuntu-focal 5.4.0-204-generic #224-Ubuntu SMP Thu Dec 5 13:38:28 UTC 2024
   
 Добавлена конкретная версия сборки  
 > config.vm.box_version = "20220427.0.0"  
+
 Указано имя для Vagrant, VirtualBox, виртуальной машины
 > config.vm.define "webserver"  
 > vb.name = "vagrant-webserver-tst"  
 > config.vm.hostname = "webtest"  
+
 Выделено одно ядро и 1024МБ памяти
 > vb.memory = "1024"  
 > vb.cpus = "1"  
+
 Проброшен порт 80 с гостевой ВМ на порт 8080 хостовой машины  
 > config.vm.network "forwarded_port", guest: 80, host: 8080  
+
 После развертывания установится Веб-сервер Apache  
 > config.vm.provision "shell", inline: <<-SHELL  
 >      sudo apt-get update  
