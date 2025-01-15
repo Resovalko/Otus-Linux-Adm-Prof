@@ -1,0 +1,26 @@
+ungrouped:
+  hosts:
+    10.126.112.3
+msk:
+  hosts:
+    pve:
+      ansible_host: 10.126.112.10:223
+      ansible_user: resovalko
+      ansible_pass: gfikbdjyufl.rb
+vorovskogo:
+  hosts:
+    10.126.112.20:334
+kamenka:
+  hosts:
+    10.126.112.4:567
+vagrant:
+  hosts:
+    test:
+      ansible_host: 10.0.2.15
+      ansible_user: vagrant
+      ansible_pass: vagrant
+webservers:
+  children:
+    msk:
+    vorovskogo:
+    kamenka:

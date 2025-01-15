@@ -15,7 +15,7 @@
 
 > Vagrant 2.4.3  
 > Oracle VM VirtualBox VM Selector v7.0.22  
-> ansible 2.10.8
+> ansible [core 2.17.7]  
 
 На **виртуальной машине 1** запущены две виртуальные ВМ **test_vm** и **test_vm1** виртуальная среда которых описана в соответствующем Vagrant-файле:  
 

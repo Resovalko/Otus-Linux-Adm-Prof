@@ -12,7 +12,7 @@
 
 > Vagrant 2.4.3  
 > Oracle VM VirtualBox VM Selector v7.0.22  
-> ansible 2.10.8  
+> ansible [core 2.17.7]  
 
 ### Виртуальная машина 2
 > Debian GNU/Linux 12 (bookworm)  
