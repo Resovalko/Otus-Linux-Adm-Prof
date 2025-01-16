@@ -11,3 +11,4 @@
 
      - name: Simple shell
        ansible.builtin.shell: hostname && w
+...

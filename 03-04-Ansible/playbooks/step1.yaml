@@ -12,3 +12,4 @@
   - name: info
     ansible.builtin.shell: hostname && w && lsb_release -a
     register: result
+...
