@@ -1,0 +1,12 @@
+vagrantsvm:
+  hosts:
+    vagrant_vm1:
+      ansible_host: 127.0.0.1
+      ansible_port: 2222
+      ansible_user: vagrant
+      ansible_private_key_file: /home/resovalko/otus/01-Start-CreateWorkSpace/test_vm/.vagrant/machines/first-vm/virtualbox/private_key
+    vagrant_vm2:
+      ansible_host: 127.0.0.1
+      ansible_port: 2200
+      ansible_user: vagrant
+      ansible_private_key_file: /home/resovalko/otus/01-Start-CreateWorkSpace/test_vm1/.vagrant/machines/webserver/virtualbox/private_key

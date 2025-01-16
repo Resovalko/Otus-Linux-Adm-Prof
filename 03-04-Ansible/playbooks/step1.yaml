@@ -1,0 +1,14 @@
+---
+- name: Simple playbook
+  hosts: all
+  remote_user: root
+  serial: 5
+  gather_facts: true
+
+  tasks:
+  - name: ping
+    ansible.builtin.ping:
+
+  - name: info
+    ansible.builtin.shell: hostname && w && lsb_release -a
+    register: result
