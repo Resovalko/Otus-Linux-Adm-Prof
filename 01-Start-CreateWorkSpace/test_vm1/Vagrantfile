@@ -25,6 +25,7 @@ Vagrant.configure("2") do |config|
   #Проброс порта с гостевой машины в хост
   #Порт 80 в созданной ВМ будет доступен нам на порту 8080 хоста
   config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 22, host: 2224, id: "ssh"
 
   #Указываем настройки спецификации ВМ
   #Указывается в отдельном цикле

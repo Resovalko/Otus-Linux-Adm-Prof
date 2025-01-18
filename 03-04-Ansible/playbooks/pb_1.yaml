@@ -1,0 +1,27 @@
+---
+- name: Check user
+  hosts: all
+  become: true
+  tasks:
+    - name: Run whoami command
+      command: whoami
+      register: whoami_result  # Сохранение результата команды
+
+    - name: Show whoami output
+      debug:
+        msg: "Current user is {{ whoami_result.stdout }}"
+
+- name: Update apt package cache with cache expiration
+  hosts: all
+  become: true
+  tasks:
+    - name: Update apt package cache
+      ansible.builtin.apt:
+        update_cache: yes
+        cache_valid_time: 3600  # Кэш будет действителен 1 час (в секундах)
+        #upgrade: yes # safe
+
+    - name: Upgrade installed packages
+      apt:
+        upgrade: full # safe
+...

@@ -2,27 +2,34 @@
 ungrouped:
   hosts:
     10.126.112.3
+vagrant:
+  hosts:
+    vagrant_vm1:
+      ansible_host: 127.0.0.1
+      ansible_port: 2223
+      ansible_user: vagrant
+      ansible_private_key_file: /home/resovalko/otus/01-Start-CreateWorkSpace/test_vm/.vagrant/machines/first-vm/virtualbox/private_key
+    vagrant_vm2:
+      ansible_host: 127.0.0.1
+      ansible_port: 2224
+      ansible_user: vagrant
+      ansible_private_key_file: /home/resovalko/otus/01-Start-CreateWorkSpace/test_vm1/.vagrant/machines/webserver/virtualbox/private_key
 msk:
   hosts:
     pve:
-      ansible_host: 10.126.112.10:223
-      ansible_user: resovalko
-      ansible_pass: gfikbdjyufl.rb
-vorovskogo:
+      ansible_host: 10.126.112.217
+tula:
   hosts:
-    10.126.112.20:334
-kamenka:
-  hosts:
-    10.126.112.4:567
-vagrant:
-  hosts:
-    test:
-      ansible_host: 10.0.2.15
-      ansible_user: vagrant
-      ansible_pass: vagrant
+    debian:
+      ansible_host: 10.126.112.216
+      ansible_user: it_tech
+      #ansible_become_pass: sudo_pass
+      #ansible_password: login_pass
+      ansible_private_key_file: /home/resovalko/.ssh/ansible_it_tech.pub
+
 webservers:
   children:
-    msk:
-    vorovskogo:
-    kamenka:
+    tula:
+  hosts:
+    vagrant_vm2:
 ...
