@@ -26,7 +26,6 @@ tula:
       #ansible_become_pass: sudo_pass
       #ansible_password: login_pass
       ansible_private_key_file: /home/resovalko/.ssh/ansible_it_tech.pub
-
 webservers:
   children:
     tula:

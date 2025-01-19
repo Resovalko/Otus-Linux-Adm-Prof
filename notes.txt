@@ -15,3 +15,7 @@ ssh
 ssh-keygen -f /home/resovalko/.ssh/ansible_it_tech -t ed25519
 ssh-copy-id -i /home/resovalko/.ssh/ansible_it_tech.pub it_tech@10.126.112.216
   inventory user=it_tech, --ask-become-pass=it_tech_user_password, user must be in sudo group
+
+watch ls -la
+
+

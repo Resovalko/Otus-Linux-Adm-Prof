@@ -18,10 +18,64 @@
     - name: Update apt package cache
       ansible.builtin.apt:
         update_cache: yes
-        cache_valid_time: 3600  # Кэш будет действителен 1 час (в секундах)
-        #upgrade: yes # safe
+        cache_valid_time: 360 # Кэш будет действителен 1 час (в секундах)
 
     - name: Upgrade installed packages
-      apt:
+      ansible.builtin.apt:
         upgrade: full # safe
+
+- name: Install multiple packages
+  hosts: all
+  become: true
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - curl
+          - gnupg2
+          - ca-certificates
+          - mc
+        state: present
+
+- name: Tasks for Ubuntu focal (20.04)
+  hosts: all
+  become: true
+  tasks:
+    - block:
+        - name: Import an official nginx signing key
+          ansible.builtin.get_url:
+            url: https://nginx.org/keys/nginx_signing.key
+            dest: /usr/share/keyrings/nginx-archive-keyring.asc #ASCII
+        - name: Debug Import an official nginx signing key
+          debug:
+            msg: "Import an official nginx signing key is running on Ubuntu focal"
+
+        - name: Add the nginx agent repository
+          ansible.builtin.apt_repository:
+            repo: "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.asc] http://nginx.org/packages/ubuntu {{ ansible_distribution_release }} nginx"
+            filename: nginx_repository
+        - name: Debug Add the nginx agent repository
+          debug:
+            msg: "Add the nginx repository is running on Ubuntu focal"
+      when: #ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_release'] == "focal"
+        - ansible_facts['distribution'] == "Ubuntu"
+        - ansible_facts['distribution_release'] == "focal"
+        #- ansible_facts['os_family'] == "Debian"
+        #- ansible_facts['distribution'] == "Ubuntu"
+        #- ansible_facts['distribution_version'] == "20.04"
+
+- name: Install NGINX
+  hosts: webservers
+  become: true
+  tasks:
+    - name: Install NGINX apt package
+      ansible.builtin.apt:
+         name: nginx
+         state: present
+
+    - name: Ensure Nginx is running and enabled
+      ansible.builtin.systemd_service:
+        name: nginx
+        state: stopped
+        enabled: false
 ...
