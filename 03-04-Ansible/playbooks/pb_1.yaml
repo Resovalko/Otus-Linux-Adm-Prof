@@ -4,11 +4,11 @@
   become: true
   tasks:
     - name: Run whoami command
-      command: whoami
+      ansible.builtin.command: whoami
       register: whoami_result  # Сохранение результата команды
 
     - name: Show whoami output
-      debug:
+      ansible.builtin.debug:
         msg: "Current user is {{ whoami_result.stdout }}"
 
 - name: Update apt package cache with cache expiration
@@ -29,7 +29,7 @@
   become: true
   tasks:
     - name: Install required packages
-      apt:
+      ansible.builtin.apt:
         name:
           - curl
           - gnupg2
@@ -47,7 +47,7 @@
             url: https://nginx.org/keys/nginx_signing.key
             dest: /usr/share/keyrings/nginx-archive-keyring.asc #ASCII
         - name: Debug Import an official nginx signing key
-          debug:
+          ansible.builtin.debug:
             msg: "Import an official nginx signing key is running on Ubuntu focal"
 
         - name: Add the nginx agent repository
@@ -55,7 +55,7 @@
             repo: "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.asc] http://nginx.org/packages/ubuntu {{ ansible_distribution_release }} nginx"
             filename: nginx_repository
         - name: Debug Add the nginx agent repository
-          debug:
+          ansible.builtin.debug:
             msg: "Add the nginx repository is running on Ubuntu focal"
       when: #ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_release'] == "focal"
         - ansible_facts['distribution'] == "Ubuntu"
@@ -73,9 +73,35 @@
          name: nginx
          state: present
 
-    - name: Ensure Nginx is running and enabled
+    - name: Stop & disable Nginx service
       ansible.builtin.systemd_service:
         name: nginx
         state: stopped
         enabled: false
+
+- name: Config NGINX
+  hosts: webservers
+  become: true
+  vars:
+    domain_name: default_server
+    nginx_listen_port: 81
+    # server_name: "{{ inventory_hostname }}"  # Имя сервера из inventory
+    server_name: "{{ ansible_facts['hostname'] }}"  # Имя хоста из Ansible facts
+    server_ip: "{{ ansible_facts['default_ipv4']['address'] }}"  # Основной IP-адрес сервера
+  tasks:
+    - name: Deploy Nginx configuration from template
+      ansible.builtin.template:
+        src: templates/nginx_default.conf.j2
+        dest: /etc/nginx/conf.d/default.conf
+        mode: '0644'
+    - name: Deploy server info HTML
+      ansible.builtin.template:
+        src: templates/nginx_index.html.j2
+        dest: /usr/share/nginx/html/index.html
+        mode: '0644'
+    - name: Ensure Nginx is running
+      ansible.builtin.systemd_service:
+        name: nginx
+        state: restarted
+        enabled: yes
 ...
