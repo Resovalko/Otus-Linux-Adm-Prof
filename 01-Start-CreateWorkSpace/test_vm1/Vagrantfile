@@ -30,7 +30,8 @@ Vagrant.configure("2") do |config|
   config.vm.network "forwarded_port", guest: 22, host: 2224, id: "ssh"
   #nginx
   config.vm.network "forwarded_port", guest: 81, host: 8081
-  config.vm.network "forwarded_port", guest: 8443, host: 8043
+  config.vm.network "forwarded_port", guest: 82, host: 8082
+  config.vm.network "forwarded_port", guest: 442, host: 8042
 
 
   #Указываем настройки спецификации ВМ

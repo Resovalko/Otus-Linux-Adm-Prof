@@ -1,0 +1,14 @@
+---
+# tasks file for roles/nginx_repository
+- name: Import an official nginx signing key
+  ansible.builtin.get_url:
+    url: https://nginx.org/keys/nginx_signing.key
+    dest: /usr/share/keyrings/nginx-archive-keyring.asc #ASCII
+
+- name: Add the nginx agent repository
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.asc] http://nginx.org/packages/ubuntu {{ ansible_distribution_release }} nginx"
+    filename: nginx_repository
+    state: present
+  notify: Update apt cache
+...

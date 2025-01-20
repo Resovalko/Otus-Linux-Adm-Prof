@@ -1,0 +1,25 @@
+---
+# tasks file for roles/common
+- name: Run whoami command
+  ansible.builtin.command: whoami
+  register: whoami_result
+
+- name: Show whoami output
+  ansible.builtin.debug:
+    msg: "Current user is {{ whoami_result.stdout }}"
+
+- name: Update and upgrade apt package
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    upgrade: safe
+
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - curl
+      - gnupg2
+      - ca-certificates
+      - mc
+    state: present
+...

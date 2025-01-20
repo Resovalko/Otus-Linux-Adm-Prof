@@ -1,0 +1,7 @@
+---
+# handlers file for roles/nginx_repository
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+...

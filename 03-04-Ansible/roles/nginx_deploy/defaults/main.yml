@@ -1,0 +1,11 @@
+---
+# defaults file for roles/nginx_deploy
+nginx:
+  http:
+    port: 82
+  https:
+    port: 442
+  certs:
+    pub: fullchain.pem
+    priv: privkey.pem
+...

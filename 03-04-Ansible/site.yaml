@@ -1,0 +1,18 @@
+---
+- name: Setup NGINX server
+  hosts: webservers
+  gather_facts: true
+  become: true
+  roles:
+    - role: common
+      tags: common
+    - role: nginx_repository
+      tags: nginx_repository
+      when:
+        - ansible_facts['distribution'] == "Ubuntu"
+        - ansible_facts['distribution_release'] == "focal"
+    - role: nginx_install
+      tags: nginx_install
+    - role: nginx_deploy
+      tags: nginx_deploy
+...
