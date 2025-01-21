@@ -50,7 +50,6 @@ debian                     : ok=16   changed=4    unreachable=0    failed=0    s
 vagrant_vm2                : ok=20   changed=4    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0 
 ```
 На сервере **debian** установлен и настроен NGINX (nginx/1.22.1), доступен на порту **81**  
-
 ```
 resovalko@otus-ubuntu:~/otus/03-04-Ansible$ curl 10.126.112.216:81
 <!DOCTYPE html>
@@ -100,15 +99,12 @@ font-family: Tahoma, Verdana, Arial, sans-serif; }
 **--ask-become-pass** - запрашиваем пароль для повышения привилегий  
 
 ### Результат
-
 ```
 PLAY RECAP **************************************************************************************************************************
 debian                     : ok=10   changed=1    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
 vagrant_vm2                : ok=12   changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
-
 ```
 На сервере **debian** установлен и настроен NGINX (nginx/1.22.1), доступен по *http* на порту **82** и по *https* на порту **442**
-
 ```
 resovalko@otus-ubuntu:~/otus/03-04-Ansible$ curl http://10.126.112.216:82
 <!DOCTYPE html>
@@ -146,7 +142,6 @@ font-family: Tahoma, Verdana, Arial, sans-serif; }
     <p>Server HTTPS port: 442</p>
 </body>
 </html>
-
 ```
 На сервере **vagrant_vm2** установлен репозиторий NGINX из которого установлен NGINX (nginx/1.26.2) с последующей настройкой, доступен по *http* на внутреннем порту **82** и по *https* на внутреннем порту **442**, на порту хост-машины **8082** и **8042** соответственно
 ```
@@ -186,4 +181,4 @@ font-family: Tahoma, Verdana, Arial, sans-serif; }
     <p>Server HTTPS port: 442</p>
 </body>
 </html>
-```  
+```
