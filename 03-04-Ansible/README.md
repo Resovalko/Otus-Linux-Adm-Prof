@@ -90,7 +90,7 @@ font-family: Tahoma, Verdana, Arial, sans-serif; }
 ```  
 
 ## Установка и настройка NGINX с использованием ролей  
-Файл playbook с использованием ролей *site.yaml*  
+Файл playbook с использованием ролей - *site.yaml*  
 Папка с ролями - *roles*, для создания структуры использована комманда *ansible-galaxy init roles/имя_роли*
 
 ### Запуск выполнения командой
