@@ -20,8 +20,6 @@
 
 На **основной виртуальной машине** запущена ВМ **test_vm1** с использованием [Vagrantfile](../01-Start-CreateWorkSpace/test_vm1/Vagrantfile):  
 
-https://github.com/Resovalko/Otus-Linux-Adm-Prof/tree/main/01-Start-CreateWorkSpace/test_vm1
-
 ### Виртуальная машина в **PROXMOX**
 > Debian GNU/Linux 12 (bookworm)  
 > CPU: x86-64-v2-AES  
