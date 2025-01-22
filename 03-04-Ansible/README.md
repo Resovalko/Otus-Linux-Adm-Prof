@@ -18,7 +18,7 @@
 > ansible [core 2.17.7]  
 
 
-На **основной виртуальной машине** запущена ВМ **test_vm1** с использованием [Vagrantfile](Vagrantfile1):  
+На **основной виртуальной машине** запущена ВМ **test_vm1** с использованием [Vagrantfile](https://github.com/Resovalko/Otus-Linux-Adm-Prof/tree/main/01-Start-CreateWorkSpace/test_vm1):  
 
 https://github.com/Resovalko/Otus-Linux-Adm-Prof/tree/main/01-Start-CreateWorkSpace/test_vm1
 
