@@ -1,0 +1,28 @@
+# Vagrantfile
+Vagrant.configure("2") do |config|
+  # Определяем виртуальную машину RAID-mdadm
+  config.vm.define "RAID-mdadm" do |raid_config|
+    # Используем образ Ubuntu Focal
+    raid_config.vm.box = "ubuntu/focal64"
+
+    # Устанавливаем имя виртуальной машины
+    raid_config.vm.hostname = "RAID-mdadm"
+
+    # Настраиваем сетевое подключение
+    raid_config.vm.network "private_network", type: "dhcp"
+
+    # Настраиваем ресурсы виртуальной машины
+    raid_config.vm.provider "virtualbox" do |vb|
+      vb.name = "RAID-mdadm"  # Имя виртуальной машины в VirtualBox
+      vb.memory = "1024"      # Объем памяти в мегабайтах
+      vb.cpus = 1             # Количество процессоров
+    end
+
+    # Выполняем необходимые команды при запуске
+    raid_config.vm.provision "shell", inline: <<-SHELL
+      apt-get update -y
+      apt-get upgrade -y
+      apt-get install -y mdadm
+    SHELL
+  end
+end
