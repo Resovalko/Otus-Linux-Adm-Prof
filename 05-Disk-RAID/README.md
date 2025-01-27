@@ -96,7 +96,7 @@ md10 : active raid10 sdf[3] sde[2] sdd[1] sdc[0]
 
 > vagrant@RAID-mdadm:~$ sudo mdadm /dev/md10 --fail /dev/sde  
 
-Видим проблему с 3-им диском и статус "degraded"  
+Видим проблему с 3-им диском и статус **"degraded"**  
 ```
 vagrant@RAID-mdadm:~$ cat /proc/mdstat 
 Personalities : [linear] [multipath] [raid0] [raid1] [raid6] [raid5] [raid4] [raid10] 
