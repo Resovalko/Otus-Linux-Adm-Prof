@@ -19,14 +19,19 @@ Vagrant.configure("2") do |config|
       vb.customize ["modifyvm", :id, "--ioapic", "on"]  # Включаем I/O APIC
     end
 
-    # Добавляем 2 диска по 2GB для RAID 1
-    (0..1).each do |i|
-      raid_config.vm.disk :disk, size: "2GB", name: "disk-2gb-#{i}"
-    end
+    # # Добавляем 2 диска по 2GB для RAID 1
+    # (0..1).each do |i|
+    #   raid_config.vm.disk :disk, size: "2GB", name: "disk-2gb-#{i}"
+    # end
 
-    # Добавляем 3 диска по 3GB для RAID 5
-    (0..2).each do |i|
-      raid_config.vm.disk :disk, size: "3GB", name: "disk-3gb-#{i}"
+    # # Добавляем 3 диска по 3GB для RAID 5
+    # (0..2).each do |i|
+    #   raid_config.vm.disk :disk, size: "3GB", name: "disk-3gb-#{i}"
+    # end
+
+    # Добавляем 5 дисков по 2GB для RAID 10
+    (0..4).each do |i|
+      raid_config.vm.disk :disk, size: "2GB", name: "disk-2gb-#{i}"
     end
 
     # Provisioning: установка mdadm и настройка RAID
@@ -42,13 +47,17 @@ Vagrant.configure("2") do |config|
       echo "Список доступных дисков:"
       lsblk
 
-      # Создание RAID 1 из дисков /dev/sdc и /dev/sdd
-      echo "Создание RAID 1..."
-      echo "y" | mdadm --create /dev/md1 --level=1 --raid-devices=2 /dev/sdc /dev/sdd --force
+      # # Создание RAID 1 из дисков /dev/sdc и /dev/sdd
+      # echo "Создание RAID 1..."
+      # echo "y" | mdadm --create /dev/md1 --level=1 --raid-devices=2 /dev/sdc /dev/sdd --force
 
-      # Создание RAID 5 из дисков /dev/sde, /dev/sdf, /dev/sdg
-      echo "Создание RAID 5..."
-      echo "y" | mdadm --create --verbose /dev/md5 --level=5 --raid-devices=3 /dev/sde /dev/sdf /dev/sdg --force
+      # # Создание RAID 5 из дисков /dev/sde, /dev/sdf, /dev/sdg
+      # echo "Создание RAID 5..."
+      # echo "y" | mdadm --create --verbose /dev/md5 --level=5 --raid-devices=3 /dev/sde /dev/sdf /dev/sdg --force
+
+      # Создание RAID 1 из дисков /dev/sdc и /dev/sdd
+      echo "Создание RAID 10..."
+      echo "y" | mdadm --create /dev/md10 --level=10 --raid-devices=4 /dev/sdc /dev/sdd /dev/sde /dev/sdf --force
 
       # Сохранение конфигурации RAID
       mdadm --detail --scan >> /etc/mdadm/mdadm.conf
@@ -57,20 +66,23 @@ Vagrant.configure("2") do |config|
       update-initramfs -u
       
       # Создание файловых систем на массиве RAID
-      mkfs.ext4 /dev/md1
-      mkfs.ext4 /dev/md5
+      mkfs.ext4 /dev/md10
+      # mkfs.ext4 /dev/md5
 
       # Создание точек монтирования
-      mkdir -p /mnt/raid1
-      mkdir -p /mnt/raid5
+      # mkdir -p /mnt/raid1
+      # mkdir -p /mnt/raid5
+      mkdir -p /mnt/raid10
 
       # Получение UUID массивов
-      UUID_MD1=$(blkid -s UUID -o value /dev/md1)
-      UUID_MD5=$(blkid -s UUID -o value /dev/md5)
+      # UUID_MD1=$(blkid -s UUID -o value /dev/md1)
+      # UUID_MD5=$(blkid -s UUID -o value /dev/md5)
+      UUID_MD10=$(blkid -s UUID -o value /dev/md10)
 
       # Добавление массивов в /etc/fstab
-      echo "UUID=$UUID_MD1 /mnt/raid1 ext4 defaults 0 0" >> /etc/fstab
-      echo "UUID=$UUID_MD5 /mnt/raid5 ext4 defaults 0 0" >> /etc/fstab
+      # echo "UUID=$UUID_MD1 /mnt/raid1 ext4 defaults 0 0" >> /etc/fstab
+      # echo "UUID=$UUID_MD5 /mnt/raid5 ext4 defaults 0 0" >> /etc/fstab
+      echo "UUID=$UUID_MD10 /mnt/raid10 ext4 defaults 0 0" >> /etc/fstab
 
       # Монтирование массивов
       mount -a
@@ -78,6 +90,7 @@ Vagrant.configure("2") do |config|
       echo "RAID успешно создан!"
       lsblk
 
+      # То же самое чуть подругому
       # # Проверяем наличие дисков
       # echo "Список доступных дисков:"
       # lsblk
