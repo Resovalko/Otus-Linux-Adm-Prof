@@ -95,6 +95,7 @@ md10 : active raid10 sdf[3] sde[2] sdd[1] sdc[0]
 Моделируем выход из строя одного из дисков  
 
 > vagrant@RAID-mdadm:~$ sudo mdadm /dev/md10 --fail /dev/sde  
+
 Видим проблему с 3-им диском и статус "degraded"  
 ```
 vagrant@RAID-mdadm:~$ cat /proc/mdstat 
