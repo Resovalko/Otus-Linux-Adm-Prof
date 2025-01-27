@@ -18,7 +18,7 @@
 > ansible [core 2.17.7]  
 
 
-На **основной виртуальной машине** запущена ВМ **test_vm1** с использованием [Vagrantfile](../01-Start-CreateWorkSpace/test_vm1/Vagrantfile):  
+На **основной виртуальной машине** запущена ВМ **test_vm1** с использованием [Vagrantfile](../01-Start-CreateWorkSpace/test_vm1/Vagrantfile).  
 
 ### Виртуальная машина в **PROXMOX**
 > Debian GNU/Linux 12 (bookworm)  
