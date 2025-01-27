@@ -51,7 +51,7 @@
     RAID-mdadm: sdg      8:96   0    2G  0 disk
 ```
 ```
-agrant@RAID-mdadm:~$ sudo mdadm -D /dev/md10
+vagrant@RAID-mdadm:~$ sudo mdadm -D /dev/md10
 /dev/md10:
            Version : 1.2
      Creation Time : Mon Jan 27 08:21:19 2025
@@ -93,6 +93,7 @@ md10 : active raid10 sdf[3] sde[2] sdd[1] sdc[0]
 
 ## Ломаем/восстанавливаем RAID
 Моделируем выход из строя одного из дисков  
+
 > vagrant@RAID-mdadm:~$ sudo mdadm /dev/md10 --fail /dev/sde  
 Видим проблему с 3-им диском и статус "degraded"  
 ```
@@ -138,8 +139,11 @@ Consistency Policy : resync
        2       8       64        -      faulty   /dev/sde
 ```
 Удаляем "неисправный" диск и заменяем его на "запасной"  
+
 > vagrant@RAID-mdadm:~$ sudo mdadm /dev/md10 --remove /dev/sde  
+
 > vagrant@RAID-mdadm:~$ sudo mdadm /dev/md10 --add /dev/sdg  
+
 Видим запущен процесс восстановления:
 ```
 vagrant@RAID-mdadm:~$ cat /proc/mdstat 
@@ -148,6 +152,7 @@ md10 : active raid10 sdg[4] sdf[3] sdd[1] sdc[0]
       4188160 blocks super 1.2 512K chunks 2 near-copies [4/3] [UU_U]
       [======>..............]  recovery = 30.1% (632320/2094080) finish=0.0min speed=316160K/sec
 ```
+### Результат
 Восстановленный RAID с "новым" диском **/dev/sdg**:
 ```
 vagrant@RAID-mdadm:~$ sudo mdadm -D /dev/md10
