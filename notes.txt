@@ -23,3 +23,11 @@ watch ls -la
 ansible-galaxy init roles/common
 
 ansible-vault
+
+mdadm
+mdadm -D /dev/md10
+cat /proc/mdstat
+mdadm /dev/md10 --fail /dev/sde
+mdadm /dev/md10 --remove /dev/sde
+mdadm /dev/md10 --add /dev/sdg
+
