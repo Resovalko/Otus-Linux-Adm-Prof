@@ -33,8 +33,10 @@ Do you really want to reduce lvmhomework/part1? [y/n]: y
   Logical volume lvmhomework/part1 successfully resized.
 ```
 **Монтируем Logical volume**
+
 > root@Otus-debian:~# mount /dev/lvmhomework/part1 /mnt/part1/  
-**Смотрим что получилось**
+
+**Смотрим что получилось**  
 Logical volume "part1" уменьшен до размера 2Гб  
 > root@Otus-debian:~# pvs  
 ```
