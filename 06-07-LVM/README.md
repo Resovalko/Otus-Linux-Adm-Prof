@@ -17,7 +17,8 @@
 > BIOS: SeaBIOS  
 > Machine: i440fx  
 
-### Собираем/ломаем/восстанавливаем RAID 5
+
+<!-- ### Собираем/ломаем/восстанавливаем RAID 5
 Получаем информацию о дисках  
 ```
 root@Otus-debian:~# lsblk
@@ -178,4 +179,4 @@ Consistency Policy : resync
        0       8       16        0      active sync   /dev/sdb
        1       8       32        1      active sync   /dev/sdc
        3       8       64        2      active sync   /dev/sde
-```
+``` -->
