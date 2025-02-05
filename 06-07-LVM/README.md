@@ -8,12 +8,12 @@
 > Sockets: 2  
 > Memory: 1024  
 > Hard disk 0: 32G  
-> Hard disk 1: 1G
-> Hard disk 2: 1G
-> Hard disk 3: 1G
-> Hard disk 4: 2G
-> Hard disk 5: 2G
-> Hard disk 6: 2G
+> Hard disk 1: 1G  
+> Hard disk 2: 1G  
+> Hard disk 3: 1G  
+> Hard disk 4: 2G  
+> Hard disk 5: 2G  
+> Hard disk 6: 2G  
 > BIOS: SeaBIOS  
 > Machine: i440fx  
 
