@@ -55,11 +55,15 @@ root@Otus-debian:/mnt# lvs
   part2s lvmhomework    -wi-a-----  200.00m
 ```
 **Создаем файловую систему ext4** на Logical volume "part1" и "part2s"  
-> root@Otus-debian:/mnt# mkfs.ext4 /dev/lvmhomework/part1
-> root@Otus-debian:/mnt# mkfs.ext4 /dev/lvmhomework/part2s
+> root@Otus-debian:/mnt# mkfs.ext4 /dev/lvmhomework/part1  
+
+> root@Otus-debian:/mnt# mkfs.ext4 /dev/lvmhomework/part2s  
+
 **Монтируем готовые к работе Logical volume**  
-> root@Otus-debian:/mnt# mount /dev/lvmhomework/part1 /mnt/part1/
-> root@Otus-debian:/mnt# mount /dev/lvmhomework/part2s /mnt/part2s/
+> root@Otus-debian:/mnt# mount /dev/lvmhomework/part1 /mnt/part1/  
+
+> root@Otus-debian:/mnt# mount /dev/lvmhomework/part2s /mnt/part2s/  
+
 > root@Otus-debian:/mnt# df -hT
 ```
 Filesystem                        Type      Size  Used Avail Use% Mounted on
