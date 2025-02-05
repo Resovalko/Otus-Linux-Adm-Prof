@@ -1,8 +1,11 @@
 ## Уменьшение размера Logical volume
 ### ВОЗМОЖНА ПОТЕРЯ ДАННЫХ! Выполнять только после создания бэкапа всех данных на Logical volume!
 **Отмонтируем Logical volume**  
-> root@Otus-debian:~# umount /mnt/part1/
+
+> root@Otus-debian:~# umount /mnt/part1/  
+
 **Выполняем проверку файловой системы**  
+
 >root@Otus-debian:~# e2fsck -fy /dev/lvmhomework/part1
 ```
 e2fsck 1.47.0 (5-Feb-2023)
