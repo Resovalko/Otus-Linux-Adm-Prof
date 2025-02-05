@@ -106,9 +106,10 @@ drwxr-xr-x  7 root root  4096 Feb  3 21:51 spool
 drwxr-xr-t  7 root root  4096 Feb  3 21:51 tmp
 drwxr-xr-x  3 root root  4096 Feb  3 21:51 www
 ```
-**Восстанавливаем** потерянные данные
+**Восстанавливаем** потерянные данные  
 **Отмонтируем** Logical volume с именем "part1" и его snapshot (если он был примонтирован)
 > root@Otus-debian:/mnt# umount /mnt/part1  
+
 **Восстановим данные из snapshot** в оригинальный Logical volume
 > root@Otus-debian:/mnt# lvconvert --merge /dev/lvmhomework/part1-snap
 ```
