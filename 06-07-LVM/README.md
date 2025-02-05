@@ -14,6 +14,7 @@
 > Hard disk 4: 2G  
 > Hard disk 5: 2G  
 > Hard disk 6: 2G  
+> Hard disk 7: 2G  
 > BIOS: SeaBIOS  
 > Machine: i440fx  
 
