@@ -31,3 +31,49 @@ mdadm /dev/md10 --fail /dev/sde
 mdadm /dev/md10 --remove /dev/sde
 mdadm /dev/md10 --add /dev/sdg
 
+UUID
+lsblk -f
+blkid
+
+LVM
+pvcreate /dev/md5 #можно пропустить
+vgcreate lvmhomework /dev/md5
+lvcreate -l+50%FREE -n part1 lvmhomework
+lvcreate -L 200M -n part2s lvmhomework
+
+mkfs.ext4 /dev/lvmhomework/part1
+mkfs.ext4 /dev/lvmhomework/part2s
+
+mount /dev/lvmhomework/part1 /mnt/part1/
+mount /dev/lvmhomework/part2s /mnt/part2s/
+
+  расширение за счет нового диска
+vgextend lvmhomework /dev/sde
+lvextend -L 3G /dev/lvmhomework/part1 -r
+
+  уменьшение
+umount /mnt/part1/
+e2fsck -fy /dev/lvmhomework/part1
+resize2fs /dev/lvmhomework/part1 2G
+lvreduce /dev/lvmhomework/part1 -L 2G
+mount /dev/lvmhomework/part1 /mnt/part1/
+
+  снапшот
+lvcreate -L 500M -s -n part1-snap lvmhomework/part1
+umount /mnt/part1
+lvconvert --merge /dev/lvmhomework/part1-snap
+mount /dev/lvmhomework/part1 /mnt/part1
+
+  кэширование
+lvcreate --type cache-pool lvmhomework -n cache_part2s -L 50M /dev/sdf
+lvconvert --cache --cache-pool lvmhomework/cache_part2s lvmhomework/part2s
+lvs -a
+
+lvconvert --uncache lvmhomework/part2s
+
+  raid
+pvcreate /dev/sd{f,g}
+vgcreate lvmraid /dev/sd{f,g}
+lvcreate -l+80%FREE -m1 -n mirror lvmraid
+
+
