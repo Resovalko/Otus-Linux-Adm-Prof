@@ -333,8 +333,6 @@ tmpfs                               97M  1.1M   96M   2% /run
 **Добавляем монтирование при запуске системы**
 > root@Otus-debian:/# echo "\`blkid | grep var_lv: | awk '{print $2}'\` /var ext4 defaults 0 0" >> /etc/fstab
 
-<pre> root@Otus-debian:/# echo "`blkid | grep var_lv: | awk '{print $2}'` /var ext4 defaults 0 0" >> /etc/fstab</pre>
-
 **Перезагружаем систему и смотрим полученный результат**
 - Системный раздел **/** имеет размер 10Гб, расположен на исходном томе
 - Каталог **/var** вынесен на отдельный раздел и примонтирован
@@ -455,7 +453,7 @@ Writing superblocks and filesystem accounting information: done
 > root@Otus-debian:~# mount /dev/Otus-debian-vg/home /home/  
 
 **Добавляем монтирование при запуске системы**
-root@Otus-debian:~# echo "`blkid | grep home: | awk '{print $2}'` /home ext4 defaults 0 0" >> /etc/fstab
+root@Otus-debian:~# echo "\`blkid | grep home: | awk '{print $2}'\` /home ext4 defaults 0 0" >> /etc/fstab
 
 ## Итоговый результат и состояние системы после всех проделанных действий
 - Размер системного раздела **/** уменьшен с 32Гб до 10Гб, расположен на исходном томе
