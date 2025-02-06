@@ -331,7 +331,9 @@ tmpfs                               97M  1.1M   96M   2% /run
 /dev/mapper/Otus_var_vg-var_lv     2.0G  659M  1.2G  36% /var
 ```
 **Добавляем монтирование при запуске системы**
-> root@Otus-debian:/# echo "``blkid | grep var_lv: | awk '{print $2}'`` /var ext4 defaults 0 0" >> /etc/fstab
+> root@Otus-debian:/# echo "\`blkid | grep var_lv: | awk '{print $2}'\` /var ext4 defaults 0 0" >> /etc/fstab
+
+<pre> ```bash root@Otus-debian:/# echo "`blkid | grep var_lv: | awk '{print $2}'` /var ext4 defaults 0 0" >> /etc/fstab ``` </pre>
 
 **Перезагружаем систему и смотрим полученный результат**
 - Системный раздел **/** имеет размер 10Гб, расположен на исходном томе
