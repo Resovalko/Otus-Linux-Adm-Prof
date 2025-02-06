@@ -14,48 +14,257 @@
 > Hard disk 4: 2G  
 > Hard disk 5: 2G  
 > Hard disk 6: 2G  
-> Hard disk 7: 2G  
+> Hard disk 7: 10G  
 > BIOS: SeaBIOS  
 > Machine: i440fx  
 
-
-<!-- ### Собираем/ломаем/восстанавливаем RAID 5
-Получаем информацию о дисках  
+## Изменение размера системного каталога _/_
+Изначлаьно имеющаяся структура блочных устройств:
+> root@Otus-debian:~# lsblk
 ```
-root@Otus-debian:~# lsblk
-NAME                        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+NAME                        MAJ:MIN RM  SIZE RO TYPE  MOUNTPOINTS
 sda                           8:0    0   32G  0 disk
-├─sda1                        8:1    0  487M  0 part /boot
+├─sda1                        8:1    0  487M  0 part  /boot
 ├─sda2                        8:2    0    1K  0 part
 └─sda5                        8:5    0 31.5G  0 part
-  ├─Otus--debian--vg-root   254:0    0 30.5G  0 lvm  /
-  └─Otus--debian--vg-swap_1 254:1    0  976M  0 lvm  [SWAP]
+  ├─Otus--debian--vg-root   253:2    0 30.5G  0 lvm   /
+  └─Otus--debian--vg-swap_1 253:3    0  976M  0 lvm   [SWAP]
 sdb                           8:16   0    1G  0 disk
+└─md5                         9:5    0    2G  0 raid5
+  └─lvmhomework-part1       253:0    0    1G  0 lvm
 sdc                           8:32   0    1G  0 disk
+└─md5                         9:5    0    2G  0 raid5
+  └─lvmhomework-part1       253:0    0    1G  0 lvm
 sdd                           8:48   0    1G  0 disk
-sde                           8:64   0    1G  0 disk
+└─md5                         9:5    0    2G  0 raid5
+  └─lvmhomework-part1       253:0    0    1G  0 lvm
+sde                           8:64   0    2G  0 disk
+sdf                           8:80   0    2G  0 disk
+sdg                           8:96   0    2G  0 disk
+sdh                           8:112  0   10G  0 disk
+sr0                          11:0    1 1024M  0 rom
 ```
-**Собираем RAID 5**  
+> root@Otus-debian:~# pvs
 ```
-root@Otus-debian:~# mdadm --create --verbose /dev/md5 --level=5 --raid-devices=3 /dev/sdb /dev/sdc /dev/sdd
-mdadm: layout defaults to left-symmetric
-mdadm: layout defaults to left-symmetric
-mdadm: chunk size defaults to 512K
-mdadm: size set to 1046528K
-mdadm: Defaulting to version 1.2 metadata
-mdadm: array /dev/md5 started.
+  PV         VG             Fmt  Attr PSize   PFree
+  /dev/md5   lvmhomework    lvm2 a--    1.99g 1016.00m
+  /dev/sda5  Otus-debian-vg lvm2 a--  <31.52g   44.00m
 ```
-Сохраняем конфигурацию и обновляем initramfs  
-> root@Otus-debian:~# mdadm --detail --scan >> /etc/mdadm/mdadm.conf  
+> root@Otus-debian:~# vgs
+```
+  VG             #PV #LV #SN Attr   VSize   VFree
+  Otus-debian-vg   1   2   0 wz--n- <31.52g   44.00m
+  lvmhomework      1   1   0 wz--n-   1.99g 1016.00m
+```
+> root@Otus-debian:~# lvs
+```
+  LV     VG             Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  root   Otus-debian-vg -wi-ao----  30.52g
+  swap_1 Otus-debian-vg -wi-ao---- 976.00m
+  part1  lvmhomework    -wi-a-----   1.00g
+```
+> root@Otus-debian:~# df -h
+```
+Filesystem                         Size  Used Avail Use% Mounted on
+udev                               448M     0  448M   0% /dev
+tmpfs                               97M 1008K   96M   2% /run
+/dev/mapper/Otus--debian--vg-root   30G  5.1G   24G  18% /
+tmpfs                              481M     0  481M   0% /dev/shm
+tmpfs                              5.0M     0  5.0M   0% /run/lock
+/dev/sda1                          455M  144M  287M  34% /boot
+tmpfs                               97M   40K   97M   1% /run/user/108
+tmpfs                               97M   36K   97M   1% /run/user/1000
+```
 
-> root@Otus-debian:~# update-initramfs -u  
+### Перенос системного каталога _/_ на временный том
+Для временного расположения системного каталога _/_ будет использован **/dev/sdh** размером 10Gb  
 
-Создаем файловую систему, точку монтирования и подключаем RAID
+**Создаем Volume group и Logical volume** 
+>root@Otus-debian:~# vgcreate vg_root /dev/sdh
 ```
-root@Otus-debian:~# mkfs.ext4 /dev/md5
+  Physical volume "/dev/sdh" successfully created.
+  Volume group "vg_root" successfully created
+```
+> root@Otus-debian:~# lvcreate -n lv_root -l +100%FREE /dev/vg_root
+```
+  Logical volume "lv_root" created.
+```
+> root@Otus-debian:~# mkfs.ext4 /dev/vg_root/lv_root
+```
 mke2fs 1.47.0 (5-Feb-2023)
-Creating filesystem with 523264 4k blocks and 130816 inodes
-Filesystem UUID: 16cdd4f8-8caa-4384-aa9a-92b546e42eb0
+Discarding device blocks: done
+Creating filesystem with 2620416 4k blocks and 655360 inodes
+Filesystem UUID: 6ed4339f-7976-4a9f-9ac9-c2f354cc6dda
+Superblock backups stored on blocks:
+        32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632
+
+Allocating group tables: done
+Writing inode tables: done
+Creating journal (16384 blocks): done
+Writing superblocks and filesystem accounting information: done
+```
+
+**Монтируем Logical volume** во временную директорию **/mnt/mnt_root/**  
+> root@Otus-debian:/mnt# mount /dev/vg_root/lv_root /mnt/mnt_root/  
+
+> root@Otus-debian:/mnt# df -h  
+```
+Filesystem                         Size  Used Avail Use% Mounted on
+udev                               448M     0  448M   0% /dev
+tmpfs                               97M 1012K   96M   2% /run
+/dev/mapper/Otus--debian--vg-root   30G  5.1G   24G  18% /
+tmpfs                              481M     0  481M   0% /dev/shm
+tmpfs                              5.0M     0  5.0M   0% /run/lock
+/dev/sda1                          455M  144M  287M  34% /boot
+tmpfs                               97M   40K   97M   1% /run/user/108
+tmpfs                               97M   36K   97M   1% /run/user/1000
+/dev/mapper/vg_root-lv_root        9.8G   24K  9.3G   1% /mnt/mnt_root
+```
+
+**Копируем данные системы из корневого каталога в /mnt/mnt_root**  
+> root@Otus-debian:/mnt# rsync -avxHAX --progress / /mnt/mnt_root/
+... ждем завершения операции копирования
+```
+sent 4,973,158,024 bytes  received 2,556,397 bytes  77,142,859.24 bytes/sec
+total size is 5,387,727,359  speedup is 1.08
+```
+
+Для системных каталогов: 
+**/proc/** — виртуальная файловая система с информацией о процессах и состоянии ядра.
+**/sys/** — интерфейс для взаимодействия с ядром и устройствами.
+**/dev/** — устройства и псевдо-устройства (например, диски, терминалы).
+**/run/** — временные файлы и данные, нужные для работы служб после загрузки.
+**/boot/** — файлы для загрузки системы (ядро, initrd, grub).
+Создаем зеркальное отображение каталога каждого из вышеперечисленных каталогов в соответствующей директории в **/mnt/mnt_root/**
+> root@Otus-debian:/mnt# for i in /proc/ /sys/ /dev/ /run/ /boot/; do mount --bind $i /mnt/mnt_root/$i; done  
+
+**Основная система полностью продублирована на временном томе**  
+Переходим в перемещенную систему  
+> root@Otus-debian:/# chroot /mnt/mnt_root/  
+
+**Вносим изменения** в загрузчик GRUB и начальный загрузочный образ, **что необходимо для правильной работы ядра при старте системы**  
+> root@Otus-debian:/# grub-mkconfig -o /boot/grub/grub.cfg
+```
+Generating grub configuration file ...
+Found background image: /usr/share/images/desktop-base/desktop-grub.png
+Found linux image: /boot/vmlinuz-6.1.0-30-amd64
+Found initrd image: /boot/initrd.img-6.1.0-30-amd64
+Found linux image: /boot/vmlinuz-6.1.0-28-amd64
+Found initrd image: /boot/initrd.img-6.1.0-28-amd64
+Warning: os-prober will not be executed to detect other bootable partitions.
+Systems on them will not be added to the GRUB boot configuration.
+Check GRUB_DISABLE_OS_PROBER documentation entry.
+done
+```
+> root@Otus-debian:/# update-initramfs -u
+```
+update-initramfs: Generating /boot/initrd.img-6.1.0-30-amd64
+```
+
+ребут
+
+после загрузки видим что вся система перемещена на диск размером 10гб 
+root@Otus-debian:~# lsblk
+NAME                        MAJ:MIN RM  SIZE RO TYPE  MOUNTPOINTS
+sda                           8:0    0   32G  0 disk
+├─sda1                        8:1    0  487M  0 part  /boot
+├─sda2                        8:2    0    1K  0 part
+└─sda5                        8:5    0 31.5G  0 part
+  ├─Otus--debian--vg-root   253:0    0 30.5G  0 lvm
+  └─Otus--debian--vg-swap_1 253:2    0  976M  0 lvm   [SWAP]
+sdb                           8:16   0    1G  0 disk
+└─md5                         9:5    0    2G  0 raid5
+  └─lvmhomework-part1       253:3    0    1G  0 lvm
+sdc                           8:32   0   10G  0 disk
+└─vg_root-lv_root           253:1    0   10G  0 lvm   /
+sdd                           8:48   0    1G  0 disk
+└─md5                         9:5    0    2G  0 raid5
+  └─lvmhomework-part1       253:3    0    1G  0 lvm
+sde                           8:64   0    1G  0 disk
+└─md5                         9:5    0    2G  0 raid5
+  └─lvmhomework-part1       253:3    0    1G  0 lvm
+sdf                           8:80   0    2G  0 disk
+sdg                           8:96   0    2G  0 disk
+sdh                           8:112  0    2G  0 disk
+sr0                          11:0    1 1024M  0 rom
+
+
+root@Otus-debian:~# lsblk | grep root
+  ├─Otus--debian--vg-root   253:0    0 30.5G  0 lvm
+└─vg_root-lv_root           253:1    0   10G  0 lvm   /
+
+
+- править - Теперь нам нужно изменить размер старой VG и вернуть на него рут. Для этого удаляем старый LV размером в 40G и создаём новый на 8G:
+пересоздаем логикал волум рут с 30гб на 10 гб
+
+root@Otus-debian:~# lvs
+  LV      VG             Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  root    Otus-debian-vg -wi-a-----  30.52g
+  swap_1  Otus-debian-vg -wi-ao---- 976.00m
+  part1   lvmhomework    -wi-a-----   1.00g
+  lv_root vg_root        -wi-ao---- <10.00g
+
+root@Otus-debian:~# lvremove Otus-debian-vg/root
+Do you really want to remove active logical volume Otus-debian-vg/root? [y/n]: y
+  Logical volume "root" successfully removed.
+
+root@Otus-debian:~# lvcreate -n root -L 10G Otus-debian-vg
+WARNING: ext4 signature detected on /dev/Otus-debian-vg/root at offset 1080. Wipe it? [y/n]: y
+  Wiping ext4 signature on /dev/Otus-debian-vg/root.
+  Logical volume "root" created.
+root@Otus-debian:~# mkfs.ext4 /dev/Otus-debian-vg/root
+mke2fs 1.47.0 (5-Feb-2023)
+Discarding device blocks: done
+Creating filesystem with 2621440 4k blocks and 655360 inodes
+Filesystem UUID: 59a04b64-eaa3-48a8-bda3-c0edd2c7374b
+Superblock backups stored on blocks:
+        32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632
+
+Allocating group tables: done
+Writing inode tables: done
+Creating journal (16384 blocks): done
+Writing superblocks and filesystem accounting information: done
+
+root@Otus-debian:~# lvs
+  LV      VG             Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  root    Otus-debian-vg -wi-a-----  10.00g
+  swap_1  Otus-debian-vg -wi-ao---- 976.00m
+  part1   lvmhomework    -wi-a-----   1.00g
+  lv_root vg_root        -wi-ao---- <10.00g
+
+проделываем ту же процедуру что в обратку
+
+root@Otus-debian:~# mount /dev/Otus-debian-vg/root /mnt/mnt_root/
+root@Otus-debian:~# rsync -avxHAX --progress / /mnt/mnt_root/
+root@Otus-debian:~# for i in /proc/ /sys/ /dev/ /run/ /boot/; do mount --bind $i /mnt/mnt_root/$i; done
+root@Otus-debian:~# chroot /mnt/mnt_root/
+root@Otus-debian:/# grub-mkconfig -o /boot/grub/grub.cfg
+Generating grub configuration file ...
+Found background image: /usr/share/images/desktop-base/desktop-grub.png
+Found linux image: /boot/vmlinuz-6.1.0-30-amd64
+Found initrd image: /boot/initrd.img-6.1.0-30-amd64
+Found linux image: /boot/vmlinuz-6.1.0-28-amd64
+Found initrd image: /boot/initrd.img-6.1.0-28-amd64
+Warning: os-prober will not be executed to detect other bootable partitions.
+Systems on them will not be added to the GRUB boot configuration.
+Check GRUB_DISABLE_OS_PROBER documentation entry.
+done
+root@Otus-debian:/# update-initramfs -u
+update-initramfs: Generating /boot/initrd.img-6.1.0-30-amd64
+
+сразу вар в зеркало
+
+root@Otus-debian:/# vgcreate Otus_var_vg /dev/sd{f,g}
+  Physical volume "/dev/sdf" successfully created.
+  Physical volume "/dev/sdg" successfully created.
+  Volume group "Otus_var_vg" successfully created
+root@Otus-debian:/# lvcreate -l +100%FREE -m1 -n var_lv Otus_var_vg
+  Logical volume "var_lv" created.
+root@Otus-debian:/# mkfs.ext4 /dev/Otus_var_vg/var_lv
+mke2fs 1.47.0 (5-Feb-2023)
+Discarding device blocks: done
+Creating filesystem with 522240 4k blocks and 130560 inodes
+Filesystem UUID: f3688294-9b33-4bd1-9686-16aa2661741a
 Superblock backups stored on blocks:
         32768, 98304, 163840, 229376, 294912
 
@@ -64,120 +273,173 @@ Writing inode tables: done
 Creating journal (8192 blocks): done
 Writing superblocks and filesystem accounting information: done
 
-root@Otus-debian:~# mkdir -p /mnt/raid5
-root@Otus-debian:~# mount /dev/md5 /mnt/raid5/
-root@Otus-debian:~# ls -la /mnt/raid5/
-total 24
-drwxr-xr-x 3 root root  4096 Jan 27 12:57 .
-drwxr-xr-x 3 root root  4096 Jan 27 12:58 ..
-drwx------ 2 root root 16384 Jan 27 12:57 lost+found
-root@Otus-debian:~# df -hT
-Filesystem                        Type      Size  Used Avail Use% Mounted on
-udev                              devtmpfs  448M     0  448M   0% /dev
-tmpfs                             tmpfs      97M  1.1M   96M   2% /run
-/dev/mapper/Otus--debian--vg-root ext4       30G  5.0G   24G  18% /
-tmpfs                             tmpfs     481M     0  481M   0% /dev/shm
-tmpfs                             tmpfs     5.0M     0  5.0M   0% /run/lock
-/dev/sda1                         ext2      455M  144M  287M  34% /boot
-tmpfs                             tmpfs      97M   72K   96M   1% /run/user/1000
-/dev/md5                          ext4      2.0G   24K  1.9G   1% /mnt/raid5
-```
-Добавляем запись в **/etc/fstab** для автоматического монтирования  
-> echo "UUID=$(blkid -s UUID -o value /dev/md5) /mnt/raid5 ext4 defaults 0 0" >> /etc/fstab  
+root@Otus-debian:/# pvs
+  PV         VG             Fmt  Attr PSize   PFree
+  /dev/md5   lvmhomework    lvm2 a--    1.99g 1016.00m
+  /dev/sda5  Otus-debian-vg lvm2 a--  <31.52g  <20.57g
+  /dev/sdc   vg_root        lvm2 a--  <10.00g       0
+  /dev/sdf   Otus_var_vg    lvm2 a--   <2.00g       0
+  /dev/sdg   Otus_var_vg    lvm2 a--   <2.00g       0
+root@Otus-debian:/# lvs
+  LV      VG             Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  root    Otus-debian-vg -wi-ao----  10.00g
+  swap_1  Otus-debian-vg -wi-ao---- 976.00m
+  var_lv  Otus_var_vg    rwi-aor---   1.99g                                    100.00
+  part1   lvmhomework    -wi-a-----   1.00g
+  lv_root vg_root        -wi-ao---- <10.00g
 
-**Ломаем/восстанавливаем RAID**  
-Моделируем выход из строя одного из дисков  
+монтируем и перемещаем вар
 
-> root@Otus-debian:~# mdadm /dev/md5 --fail /dev/sdd  
+root@Otus-debian:/# mount /dev/Otus_var_vg/var_lv /mnt/
+root@Otus-debian:/# cp -aR /var/* /mnt/
+root@Otus-debian:/# rm -r /var/*
+root@Otus-debian:/# umount /mnt/
+root@Otus-debian:/# mount /dev/Otus_var_vg/var_lv /var/
 
-Видим проблему с 3-им диском и статус **"degraded"**  
-```
-root@Otus-debian:~# cat /proc/mdstat
-Personalities : [raid6] [raid5] [raid4] [linear] [multipath] [raid0] [raid1] [raid10]
-md5 : active raid5 sdd[3](F) sdb[0] sdc[1]
-      2093056 blocks super 1.2 level 5, 512k chunk, algorithm 2 [3/2] [UU_]
-```
-```
-root@Otus-debian:~# mdadm -D /dev/md5
-/dev/md5:
-           Version : 1.2
-     Creation Time : Mon Jan 27 12:52:13 2025
-        Raid Level : raid5
-        Array Size : 2093056 (2044.00 MiB 2143.29 MB)
-     Used Dev Size : 1046528 (1022.00 MiB 1071.64 MB)
-      Raid Devices : 3
-     Total Devices : 3
-       Persistence : Superblock is persistent
+root@Otus-debian:/# df -h
+Filesystem                         Size  Used Avail Use% Mounted on
+/dev/mapper/Otus--debian--vg-root  9.8G  4.4G  4.9G  48% /
+udev                               448M     0  448M   0% /dev
+tmpfs                               97M  1.1M   96M   2% /run
+/dev/sda1                          455M  144M  287M  34% /boot
+/dev/mapper/Otus_var_vg-var_lv     2.0G  659M  1.2G  36% /var
 
-       Update Time : Mon Jan 27 13:06:42 2025
-             State : clean, degraded
-    Active Devices : 2
-   Working Devices : 2
-    Failed Devices : 1
-     Spare Devices : 0
+добавляем монтирование фстаб
+root@Otus-debian:/# echo "`blkid | grep var_lv: | awk '{print $2}'` /var ext4 defaults 0 0" >> /etc/fstab
 
-            Layout : left-symmetric
-        Chunk Size : 512K
+результат 
+root@Otus-debian:~# df -h
+Filesystem                         Size  Used Avail Use% Mounted on
+udev                               448M     0  448M   0% /dev
+tmpfs                               97M  1.1M   96M   2% /run
+/dev/mapper/Otus--debian--vg-root  9.8G  4.4G  4.9G  48% /
+tmpfs                              481M     0  481M   0% /dev/shm
+tmpfs                              5.0M     0  5.0M   0% /run/lock
+/dev/sda1                          455M  144M  287M  34% /boot
+/dev/mapper/Otus_var_vg-var_lv     2.0G  659M  1.2G  36% /var
+tmpfs                               97M   40K   97M   1% /run/user/108
+tmpfs                               97M   36K   97M   1% /run/user/1000
+root@Otus-debian:~# pvs
+  PV         VG             Fmt  Attr PSize   PFree
+  /dev/md5   lvmhomework    lvm2 a--    1.99g 1016.00m
+  /dev/sda5  Otus-debian-vg lvm2 a--  <31.52g  <20.57g
+  /dev/sde   Otus_var_vg    lvm2 a--   <2.00g       0
+  /dev/sdf   Otus_var_vg    lvm2 a--   <2.00g       0
+  /dev/sdh   vg_root        lvm2 a--  <10.00g       0
+root@Otus-debian:~# vgs
+  VG             #PV #LV #SN Attr   VSize   VFree
+  Otus-debian-vg   1   2   0 wz--n- <31.52g  <20.57g
+  Otus_var_vg      2   1   0 wz--n-   3.99g       0
+  lvmhomework      1   1   0 wz--n-   1.99g 1016.00m
+  vg_root          1   1   0 wz--n- <10.00g       0
+root@Otus-debian:~# lvs
+  LV      VG             Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  root    Otus-debian-vg -wi-ao----  10.00g
+  swap_1  Otus-debian-vg -wi-ao---- 976.00m
+  var_lv  Otus_var_vg    rwi-aor---   1.99g                                    100.00
+  part1   lvmhomework    -wi-a-----   1.00g
+  lv_root vg_root        -wi-a----- <10.00g
+root@Otus-debian:~# lsblk
+NAME                          MAJ:MIN RM  SIZE RO TYPE  MOUNTPOINTS
+sda                             8:0    0   32G  0 disk
+├─sda1                          8:1    0  487M  0 part  /boot
+├─sda2                          8:2    0    1K  0 part
+└─sda5                          8:5    0 31.5G  0 part
+  ├─Otus--debian--vg-swap_1   253:0    0  976M  0 lvm   [SWAP]
+  └─Otus--debian--vg-root     253:1    0   10G  0 lvm   /
+sdb                             8:16   0    1G  0 disk
+└─md5                           9:5    0    2G  0 raid5
+  └─lvmhomework-part1         253:8    0    1G  0 lvm
+sdc                             8:32   0    1G  0 disk
+└─md5                           9:5    0    2G  0 raid5
+  └─lvmhomework-part1         253:8    0    1G  0 lvm
+sdd                             8:48   0    1G  0 disk
+└─md5                           9:5    0    2G  0 raid5
+  └─lvmhomework-part1         253:8    0    1G  0 lvm
+sde                             8:64   0    2G  0 disk
+├─Otus_var_vg-var_lv_rmeta_0  253:3    0    4M  0 lvm
+│ └─Otus_var_vg-var_lv        253:7    0    2G  0 lvm   /var
+└─Otus_var_vg-var_lv_rimage_0 253:4    0    2G  0 lvm
+  └─Otus_var_vg-var_lv        253:7    0    2G  0 lvm   /var
+sdf                             8:80   0    2G  0 disk
+├─Otus_var_vg-var_lv_rmeta_1  253:5    0    4M  0 lvm
+│ └─Otus_var_vg-var_lv        253:7    0    2G  0 lvm   /var
+└─Otus_var_vg-var_lv_rimage_1 253:6    0    2G  0 lvm
+  └─Otus_var_vg-var_lv        253:7    0    2G  0 lvm   /var
+sdg                             8:96   0    2G  0 disk
+sdh                             8:112  0   10G  0 disk
+└─vg_root-lv_root             253:2    0   10G  0 lvm
+sr0                            11:0    1 1024M  0 rom
 
-Consistency Policy : resync
+можем удалять временное вг и лг
+root@Otus-debian:~# vgremove vg_root
+Do you really want to remove volume group "vg_root" containing 1 logical volumes? [y/n]: y
+Do you really want to remove active logical volume vg_root/lv_root? [y/n]: y
+  Logical volume "lv_root" successfully removed.
+  Volume group "vg_root" successfully removed
+root@Otus-debian:~# pvremove /dev/sdh
+  Labels on physical volume "/dev/sdh" successfully wiped.
 
-              Name : Otus-debian:5  (local to host Otus-debian)
-              UUID : 8d06319e:cf6ecf98:a06cead9:4c926b3f
-            Events : 24
+выносим хом
 
-    Number   Major   Minor   RaidDevice State
-       0       8       16        0      active sync   /dev/sdb
-       1       8       32        1      active sync   /dev/sdc
-       -       0        0        2      removed
+создаем лв для хом и монтируем во временную директорию
 
-       3       8       48        -      faulty   /dev/sdd
-```
-Удаляем "неисправный" диск и заменяем его на "запасной"  
+root@Otus-debian:~# lvcreate -n home -L 2G Otus-debian-vg
+  Logical volume "home" created.
+root@Otus-debian:~# mkfs.ext4 /dev/Otus-debian-vg/home
+mke2fs 1.47.0 (5-Feb-2023)
+Discarding device blocks: done
+Creating filesystem with 524288 4k blocks and 131072 inodes
+Filesystem UUID: fc913ece-79a2-4fdc-91f0-65ee54a0c125
+Superblock backups stored on blocks:
+        32768, 98304, 163840, 229376, 294912
 
-> root@Otus-debian:~# mdadm /dev/md5 --remove /dev/sdd  
+Allocating group tables: done
+Writing inode tables: done
+Creating journal (16384 blocks): done
+Writing superblocks and filesystem accounting information: done
 
-> root@Otus-debian:~# mdadm /dev/md5 --add /dev/sde
+root@Otus-debian:~# mount /dev/Otus-debian-vg/home /mnt/mnt_home/
 
-Видим запущен процесс восстановления:
-```
-root@Otus-debian:~# cat /proc/mdstat
-Personalities : [raid6] [raid5] [raid4] [linear] [multipath] [raid0] [raid1] [raid10]
-md5 : active raid5 sde[3] sdb[0] sdc[1]
-      2093056 blocks super 1.2 level 5, 512k chunk, algorithm 2 [3/2] [UU_]
-      [=========>...........]  recovery = 45.0% (472188/1046528) finish=0.0min speed=236094K/sec
-```
-### Результат
-Восстановленный RAID с "новым" диском **/dev/sde**:
-```
-root@Otus-debian:~# mdadm -D /dev/md5
-/dev/md5:
-           Version : 1.2
-     Creation Time : Mon Jan 27 12:52:13 2025
-        Raid Level : raid5
-        Array Size : 2093056 (2044.00 MiB 2143.29 MB)
-     Used Dev Size : 1046528 (1022.00 MiB 1071.64 MB)
-      Raid Devices : 3
-     Total Devices : 3
-       Persistence : Superblock is persistent
+переносим содержимое и монтируем каталог
 
-       Update Time : Mon Jan 27 13:10:49 2025
-             State : clean
-    Active Devices : 3
-   Working Devices : 3
-    Failed Devices : 0
-     Spare Devices : 0
+root@Otus-debian:~# cp -aR /home/* /mnt/mnt_home/
+root@Otus-debian:~# rm -rf /home/*
+root@Otus-debian:~# umount /mnt/mnt_home
+root@Otus-debian:~# mount /dev/Otus-debian-vg/home /home/
 
-            Layout : left-symmetric
-        Chunk Size : 512K
+правим фстаб
+root@Otus-debian:~# echo "`blkid | grep home: | awk '{print $2}'` /home ext4 defaults 0 0" >> /etc/fstab
 
-Consistency Policy : resync
-
-              Name : Otus-debian:5  (local to host Otus-debian)
-              UUID : 8d06319e:cf6ecf98:a06cead9:4c926b3f
-            Events : 66
-
-    Number   Major   Minor   RaidDevice State
-       0       8       16        0      active sync   /dev/sdb
-       1       8       32        1      active sync   /dev/sdc
-       3       8       64        2      active sync   /dev/sde
-``` -->
+итого что получилось
+root@Otus-debian:~# pvs
+  PV         VG             Fmt  Attr PSize   PFree
+  /dev/md5   lvmhomework    lvm2 a--    1.99g 1016.00m
+  /dev/sda5  Otus-debian-vg lvm2 a--  <31.52g  <18.57g
+  /dev/sde   Otus_var_vg    lvm2 a--   <2.00g       0
+  /dev/sdf   Otus_var_vg    lvm2 a--   <2.00g       0
+root@Otus-debian:~# lvs
+  LV     VG             Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  home   Otus-debian-vg -wi-ao----   2.00g
+  root   Otus-debian-vg -wi-ao----  10.00g
+  swap_1 Otus-debian-vg -wi-ao---- 976.00m
+  var_lv Otus_var_vg    rwi-aor---   1.99g                                    100.00
+  part1  lvmhomework    -wi-a-----   1.00g
+root@Otus-debian:~# vgs
+  VG             #PV #LV #SN Attr   VSize   VFree
+  Otus-debian-vg   1   3   0 wz--n- <31.52g  <18.57g
+  Otus_var_vg      2   1   0 wz--n-   3.99g       0
+  lvmhomework      1   1   0 wz--n-   1.99g 1016.00m
+root@Otus-debian:~# nano /etc/fstab
+root@Otus-debian:~# df -h
+Filesystem                         Size  Used Avail Use% Mounted on
+udev                               448M     0  448M   0% /dev
+tmpfs                               97M  1.1M   96M   2% /run
+/dev/mapper/Otus--debian--vg-root  9.8G  4.4G  5.0G  47% /
+tmpfs                              481M     0  481M   0% /dev/shm
+tmpfs                              5.0M     0  5.0M   0% /run/lock
+/dev/sda1                          455M  144M  287M  34% /boot
+/dev/mapper/Otus_var_vg-var_lv     2.0G  659M  1.2G  36% /var
+tmpfs                               97M   40K   97M   1% /run/user/108
+tmpfs                               97M   36K   97M   1% /run/user/1000
+/dev/mapper/Otus--debian--vg-home  2.0G   46M  1.8G   3% /home
