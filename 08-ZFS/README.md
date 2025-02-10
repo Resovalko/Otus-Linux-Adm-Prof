@@ -1,4 +1,4 @@
-# Файловые системы. LVM.
+# Файловые системы. ZFS.
 
 ## Рабочее пространство
 Система виртуализации **PROXMOX 8.3.1**  
@@ -11,14 +11,212 @@
 > Hard disk 1: 1G  
 > Hard disk 2: 1G  
 > Hard disk 3: 1G  
-> Hard disk 4: 2G  
-> Hard disk 5: 2G  
-> Hard disk 6: 2G  
-> Hard disk 7: 10G  
+> Hard disk 4: 1G  
+> Hard disk 5: 1G  
+> Hard disk 6: 1G  
+> Hard disk 7: 1G  
+> Hard disk 8: 1G  
 > BIOS: SeaBIOS  
 > Machine: i440fx  
 
-## Изменение размера системного каталога _/_
+Изначально имеющаяся структура блочных устройств:
+> root@Otus-debian:~# lsblk
+```
+NAME                        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+sda                           8:0    0   32G  0 disk
+├─sda1                        8:1    0  487M  0 part /boot
+├─sda2                        8:2    0    1K  0 part
+└─sda5                        8:5    0 31.5G  0 part
+  ├─Otus--debian--vg-root   254:0    0 30.5G  0 lvm  /
+  └─Otus--debian--vg-swap_1 254:1    0  976M  0 lvm  [SWAP]
+sdb                           8:16   0    1G  0 disk
+sdc                           8:32   0    1G  0 disk
+sdd                           8:48   0    1G  0 disk
+sde                           8:64   0    1G  0 disk
+sdf                           8:80   0    1G  0 disk
+sdg                           8:96   0    1G  0 disk
+sdh                           8:112  0    1G  0 disk
+sdi                           8:128  0    1G  0 disk
+```
+
+## работа с zfs 
+### установка компонентов 
+
+добавляем Backports — это репозиторий 
+codename=$(lsb_release -cs);echo "deb http://deb.debian.org/debian $codename-backports main contrib non-free"|sudo tee -a /etc/apt/sources.list && sudo apt update
+
+ставим необходимые компотненты
+apt install -y linux-headers-$(uname -r) dkms zfs-dkms zfsutils-linux
+Что означают эти пакеты:
+
+linux-headers-$(uname -r) — заголовочные файлы ядра, необходимые для сборки модулей.
+dkms — система для автоматической сборки и установки модулей ядра.
+zfs-dkms — модуль ядра ZFS, собираемый через DKMS.
+zfsutils-linux — утилиты управления ZFS.
+
+првоеряем
+root@Otus-debian:~# zfs --version
+zfs-2.2.7-1~bpo12+1
+zfs-kmod-2.2.7-1~bpo12+1
+
+если надо подгружаем модуль
+Загрузка модуля ZFS
+ZFS может быть автоматически загружен, но для уверенности выполните:
+root@Otus-debian:~# modprobe zfs
+root@Otus-debian:~# lsmod | grep zfs
+zfs                  5783552  0
+spl                   135168  1 zfs
+
+### создание пулов с разной степенью компрессии
+сощздаем 4 пула raid1
+
+root@Otus-debian:~# zpool create zfs_hw1 mirror /dev/sdb /dev/sdc
+root@Otus-debian:~# zpool create zfs_hw2 mirror /dev/sdd /dev/sde
+root@Otus-debian:~# zpool create zfs_hw3 mirror /dev/sdf /dev/sdg
+root@Otus-debian:~# zpool create zfs_hw4 mirror /dev/sdh /dev/sdi
+
+root@Otus-debian:~# zpool list
+NAME      SIZE  ALLOC   FREE  CKPOINT  EXPANDSZ   FRAG    CAP  DEDUP    HEALTH  ALTROOT
+zfs_hw1   960M   117K   960M        -         -     0%     0%  1.00x    ONLINE  -
+zfs_hw2   960M   112K   960M        -         -     0%     0%  1.00x    ONLINE  -
+zfs_hw3   960M   114K   960M        -         -     0%     0%  1.00x    ONLINE  -
+zfs_hw4   960M   108K   960M        -         -     0%     0%  1.00x    ONLINE  -
+root@Otus-debian:~# zpool status
+  pool: zfs_hw1
+ state: ONLINE
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        zfs_hw1     ONLINE       0     0     0
+          mirror-0  ONLINE       0     0     0
+            sdb     ONLINE       0     0     0
+            sdc     ONLINE       0     0     0
+
+errors: No known data errors
+
+  pool: zfs_hw2
+ state: ONLINE
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        zfs_hw2     ONLINE       0     0     0
+          mirror-0  ONLINE       0     0     0
+            sdd     ONLINE       0     0     0
+            sde     ONLINE       0     0     0
+
+errors: No known data errors
+
+  pool: zfs_hw3
+ state: ONLINE
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        zfs_hw3     ONLINE       0     0     0
+          mirror-0  ONLINE       0     0     0
+            sdf     ONLINE       0     0     0
+            sdg     ONLINE       0     0     0
+
+errors: No known data errors
+
+  pool: zfs_hw4
+ state: ONLINE
+config:
+
+        NAME        STATE     READ WRITE CKSUM
+        zfs_hw4     ONLINE       0     0     0
+          mirror-0  ONLINE       0     0     0
+            sdh     ONLINE       0     0     0
+            sdi     ONLINE       0     0     0
+
+настройки сжатия по умолчанию
+root@Otus-debian:~# zfs get all | grep compression
+zfs_hw1  compression           on                     default
+zfs_hw2  compression           on                     default
+zfs_hw3  compression           on                     default
+zfs_hw4  compression           on                     default
+
+#### Сравнение алгоритмов сжатия в ZFS
+| **Алгоритм** | **Скорость сжатия** | **Скорость разжатия** | **Степень сжатия** | **Нагрузка на CPU** | **Идеальное использование** |
+|--------------|---------------------|-----------------------|--------------------|---------------------|------------------------------|
+| `lz4`        | Очень высокая       | Очень высокая         | Средняя            | Низкая              | Общие данные, виртуализация  |
+| `gzip-1`     | Средняя             | Средняя               | Высокая            | Средняя             | Архивы, где нужна умеренная компрессия |
+| `gzip-9`     | Низкая              | Низкая                | Очень высокая      | Высокая             | Архивирование, редко используемые файлы |
+| `zle`        | Очень высокая       | Очень высокая         | Низкая (кроме нулевых данных) | Очень низкая | Виртуальные диски, sparse-файлы |
+| `lzjb`       | Высокая             | Высокая               | Низкая             | Средняя             | Старые системы, резервная совместимость |
+
+#### Рекомендации по выбору алгоритма:
+1. **Для общих задач и серверов с высокими нагрузками** → lz4
+(Оптимальный баланс между скоростью и степенью сжатия).
+2. **Для архивов и бэкапов, где важен размер** → gzip-9
+(Максимальная степень сжатия, но медленнее).
+3. **Для больших файлов с нулями (виртуальные диски)** → zle
+(Эффективен для sparse-файлов).
+4. **Для старых систем или если нужно сохранить обратную совместимость** → lzjb
+(Не рекомендуется для новых систем).
+
+Добавим разные алгоритмы сжатия в каждую файловую систему:
+root@Otus-debian:~# zfs set compression=lz4 zfs_hw1
+root@Otus-debian:~# zfs set compression=gzip-9 zfs_hw2
+root@Otus-debian:~# zfs set compression=zle zfs_hw3
+root@Otus-debian:~# zfs set compression=lzjb zfs_hw4
+root@Otus-debian:~# zfs get all | grep compression
+zfs_hw1  compression           lz4                    local
+zfs_hw2  compression           gzip-9                 local
+zfs_hw3  compression           zle                    local
+zfs_hw4  compression           lzjb                   local
+
+
+Скачаем один и тот же текстовый файл во все пулы: 
+for i in {1..4}; do wget -P /zfs_hw$i https://gutenberg.org/cache/epub/2600/pg2600.converter.log; done
+
+
+
+root@Otus-debian:~# ls -l /zfs_hw*
+/zfs_hw1:
+total 18006
+-rw-r--r-- 1 root root 41123477 Feb  2 11:31 pg2600.converter.log
+
+/zfs_hw2:
+total 10966
+-rw-r--r-- 1 root root 41123477 Feb  2 11:31 pg2600.converter.log
+
+/zfs_hw3:
+total 40188
+-rw-r--r-- 1 root root 41123477 Feb  2 11:31 pg2600.converter.log
+
+/zfs_hw4:
+total 22096
+-rw-r--r-- 1 root root 41123477 Feb  2 11:31 pg2600.converter.log
+
+
+root@Otus-debian:~# zfs list
+NAME      USED  AVAIL  REFER  MOUNTPOINT
+zfs_hw1  17.7M   814M  17.6M  /zfs_hw1
+zfs_hw2  10.9M   821M  10.7M  /zfs_hw2
+zfs_hw3  39.4M   793M  39.3M  /zfs_hw3
+zfs_hw4  21.7M   810M  21.6M  /zfs_hw4
+
+root@Otus-debian:~# zfs get all | grep compres | grep -v ref
+zfs_hw1  compressratio         2.23x                  -
+zfs_hw1  compression           lz4                    local
+zfs_hw2  compressratio         3.65x                  -
+zfs_hw2  compression           gzip-9                 local
+zfs_hw3  compressratio         1.00x                  -
+zfs_hw3  compression           zle                    local
+zfs_hw4  compressratio         1.81x                  -
+zfs_hw4  compression           lzjb                   local
+
+максимальное сжатие достугнуто на zfs_hw2 - gzip-9
+минимальное - zfs_hw3 - zle
+
+
+
+
+
+
+
+
+<!-- ## Изменение размера системного каталога _/_
 Изначально имеющаяся структура блочных устройств:
 > root@Otus-debian:~# lsblk
 ```
@@ -496,4 +694,4 @@ tmpfs                              5.0M     0  5.0M   0% /run/lock
 tmpfs                               97M   40K   97M   1% /run/user/108
 tmpfs                               97M   36K   97M   1% /run/user/1000
 /dev/mapper/Otus--debian--vg-home  2.0G   46M  1.8G   3% /home
-```
+``` -->
