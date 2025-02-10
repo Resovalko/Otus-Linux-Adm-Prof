@@ -41,26 +41,26 @@ sdi                           8:128  0    1G  0 disk
 
 ## Работа с ZFS 
 ### Установка необходимых компонентов 
-Добавляем репозиторий Backports в систему
+Добавляем репозиторий Backports в систему:
 > codename=$(lsb_release -cs);echo "deb http://deb.debian.org/debian $codename-backports main contrib non-free"|sudo tee -a /etc/apt/sources.list && sudo apt update  
 
-Устанавливаем компотненты необходимые для работы с **ZFS**
+Устанавливаем компотненты необходимые для работы с **ZFS**:
 > apt install -y linux-header/s-$(uname -r) dkms zfs-dkms zfsutils-linux  
 - **linux-headers-$(uname -r)** — заголовочные файлы ядра, необходимые для сборки модулей
 - **dkms** — система для автоматической сборки и установки модулей ядра
 - **zfs-dkms** — модуль ядра ZFS, собираемый через DKMS
 - **zfsutils-linux** — утилиты управления ZFS  
 
-Загрузка **модуля ZFS** (может быть автоматически загружен)
+Загрузка **модуля ZFS** (может быть автоматически загружен):
 > root@Otus-debian:~# modprobe zfs  
 
-Проверяем что модуль загружен
+Проверяем что модуль загружен:
 > root@Otus-debian:~# lsmod | grep zfs
 ```
 zfs                  5783552  0
 spl                   135168  1 zfs
 ```
-Првоеряем доступность утилит **ZFS**
+Првоеряем доступность утилит **ZFS**:
 > root@Otus-debian:~# zfs --version
 ```
 zfs-2.2.7-1~bpo12+1
