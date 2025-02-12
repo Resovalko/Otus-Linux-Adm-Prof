@@ -169,12 +169,11 @@ drwxrwxrwx 2 nobody nogroup 4096 фев 11 20:09 upload
 Добавим запись о монтирование **NFS-шары** в **/etc/fstab**
 > root@otus-ubuntu:/# echo "10.126.112.216:/nfs-homework/share/ /mnt/server-nfs nfs noauto,x-systemd.automount 0 0" >> /etc/fstab
 
-**noauto**
+1. **noauto**
   - Указывает, что файловая система не будет автоматически монтироваться при загрузке, если не используется дополнительный механизм, например, x-systemd.automount.  
 
-**x-systemd.automount**
-  Интеграция с systemd:
-    - Включает автоматическое монтирование при первом обращении к директории /mnt/server-nfs3. Это удобно, так как монтирование произойдёт только тогда, когда это действительно нужно (ленивая загрузка).
+2. **x-systemd.automount**  
+  - Интеграция с systemd: Включает автоматическое монтирование при первом обращении к директории /mnt/server-nfs3. Это удобно, так как монтирование произойдёт только тогда, когда это действительно нужно (ленивая загрузка).
 
 Обновляем конфигурацию служб:
 > root@otus-ubuntu:/mnt# systemctl daemon-reload
@@ -190,16 +189,16 @@ drwxrwxrwx 2 nobody nogroup 4096 фев 11 20:09 upload
 > root@otus-ubuntu:/# mount -o vers=3 10.126.112.216:/nfs-homework/share /mnt/server-nfs3/  
 
 > root@otus-ubuntu:/# mount | grep mnt 
+```
 nsfs on /run/snapd/ns/snapd-desktop-integration.mnt type nsfs (rw)
 nsfs on /run/snapd/ns/snap-store.mnt type nsfs (rw)
 nsfs on /run/snapd/ns/firefox.mnt type nsfs (rw)
 10.126.112.216:/nfs-homework/share on /mnt/server-nfs3 type nfs (rw,relatime,vers=3,rsize=131072,wsize=131072,namlen=255,hard,proto=tcp,timeo=600,retrans=2,sec=sys,mountaddr=10.126.112.216,mountvers=3,mountport=52844,mountproto=udp,local_lock=none,addr=10.126.112.216)
-
+```
 Добавим запись о монтирование **NFS-шары** в **/etc/fstab**
 > root@otus-ubuntu:/# echo "10.126.112.216:/nfs-homework/share/ /mnt/server-nfs3 nfs vers=3,noauto,x-systemd.automount 0 0" >> /etc/fstab
 
-**vers=3**
-  - Принудительное использование NFS версии 3.
+**vers=3** - Принудительное использование NFS версии 3.
 
 > root@otus-ubuntu:/mnt# systemctl daemon-reload
 
