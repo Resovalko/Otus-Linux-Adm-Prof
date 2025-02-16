@@ -297,11 +297,11 @@ configure arguments: --add-module=/root/ngx_brotli
 > [root@otus-alma html]# cp /root/rpmbuild/RPMS/x86_64/* /usr/share/nginx/html/homerepo/
 
 Инициализируем репозиторий:
-> [root@otus-alma html]# createrepo //usr/share/nginx/html/homerepo/
+> [root@otus-alma html]# createrepo /usr/share/nginx/html/homerepo/
 ```
 Directory walk started
 Directory walk done - 10 packages
-Temporary output repo path: //usr/share/nginx/html/homerepo/.repodata/
+Temporary output repo path: /usr/share/nginx/html/homerepo/.repodata/
 Preparing sqlite DBs
 Pool started (with 5 workers)
 Pool finished
@@ -393,7 +393,6 @@ nginx-mod-http-perl.x86_64                           2:1.20.1-20.el9.alma.1     
 nginx-mod-http-xslt-filter.x86_64                    2:1.20.1-20.el9.alma.1              home-repo
 nginx-mod-mail.x86_64                                2:1.20.1-20.el9.alma.1              home-repo
 nginx-mod-stream.x86_64                              2:1.20.1-20.el9.alma.1              home-repo
-oddjob-mkhomedir.x86_64                              0.34.7-7.el9                        appstream
 ```
 Установим **Nginx** из репозитория **home-repo**:
 > [root@otus-alma-client ~]# dnf install --disablerepo=* --enablerepo=home-repo nginx
@@ -479,7 +478,7 @@ Connection: keep-alive
 ETag: "6161d621-1249"
 Accept-Ranges: bytes
 ```
-
+#### Результат
 Веб-сервер был установлен из локального репозитория и находится в рабочем состоянии.
 
 
