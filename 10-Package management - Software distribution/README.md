@@ -150,8 +150,9 @@ CMake Warning:
 ```
 > [root@otus-alma out]# cd ../../../..
 
-Чтобы **Nginx** собирался с необходимыми нам опциями добавляем указание на модуль раздел **%build** в файле **nginx.spec**:
-> [root@otus-alma ~]# nano rpmbuild/SPECS/nginx.spec
+Чтобы **Nginx** собирался с необходимыми нам опциями добавляем указание на модуль в раздел **%build** в файле **nginx.spec**:
+> [root@otus-alma ~]# nano rpmbuild/SPECS/nginx.spec  
+
 Добавляем строку 
 ```
 --add-module=/root/ngx_brotli \
