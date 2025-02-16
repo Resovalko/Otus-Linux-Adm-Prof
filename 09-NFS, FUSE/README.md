@@ -198,7 +198,7 @@ nsfs on /run/snapd/ns/firefox.mnt type nsfs (rw)
 Добавим запись о монтирование **NFS-шары** в **/etc/fstab**
 > root@otus-ubuntu:/# echo "10.126.112.216:/nfs-homework/share/ /mnt/server-nfs3 nfs vers=3,noauto,x-systemd.automount 0 0" >> /etc/fstab
 
-**vers=3** - Принудительное использование NFS версии 3.
+**vers=3** - принудительное использование NFS версии 3.
 
 > root@otus-ubuntu:/mnt# systemctl daemon-reload
 
