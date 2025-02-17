@@ -58,12 +58,21 @@ GRUB_TIMEOUT=25 # время отображения меню - 25 секунд
 
 
 ### Advanced options
-В меню загрузчика выбираем **Advanced options for Debian GNU/Linux** и далее пункт меню у которого в конце названия есть **(recovery mode)**
+В меню загрузчика выбираем **Advanced options for Debian GNU/Linux** и далее пункт меню у которого в конце названия есть **(recovery mode)**:
 ![Advanced options for Debian GNU/Linux](img/GRUB02.png)
+На данной системе потребуется пароль суперпользователя, введя его мы попадаем в сисему в режиме *recovery mode*:
+![Debian recovery mode](img/GRUB03.png)
 
-
-
-
+### Advanced options на Ubuntu 24
+В меню загрузчика выбираем **Advanced options for Ububntu**:
+![Advanced options for Ububntu](img/GRUB04.png)
+Выбираем пункт меню у которого в конце названия есть **(recovery mode)**:
+![Ububntu recovery mode](img/GRUB05.png)
+В **Recovery Menu** включаем поддержку сети - **network    Enable networking** чтобы файловая система перемонтировалась в режиме **RW** и подтверждаем действие:
+![network - Enable networking](img/GRUB08.png)
+![network - Enable networking - YES](img/GRUB07.png)
+Выбираем пункт **root** и попадаем в консоль с пользователем **root** (по умолчанию пароля нет, но если ранее был установлен, то его придется ввести):
+![root](img/GRUB08.png)
 
 
 
