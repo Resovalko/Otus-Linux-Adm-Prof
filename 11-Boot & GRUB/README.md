@@ -84,7 +84,7 @@ linux         /vmlinuz...
 ![root](img/GRUB09.png)
 
 ## Переименовать Volum Group на уже установленной системе
-Исходной название **VG** в системе **Otus-debian-vg**:
+Исходное название **VG** в системе - **Otus-debian-vg**:
 >root@Otus-debian:~# vgs
 ```
   VG             #PV #LV #SN Attr   VSize   VFree
@@ -95,11 +95,19 @@ linux         /vmlinuz...
 ```
   Volume group "Otus-debian-vg" successfully renamed to "Debian-Otus"
 ```
-1. Правим файл конфигурации загрузки **/boot/grub/grub.cfg**.
+1. Правим файл конфигурации загрузки **/boot/grub/grub.cfg**.  
 Заменяем старое название **VG** - **Otus-debian-vg** на новое **Debian-Otus** во всех местах где оно встречается.  
 **ОБЯЗАТЕЛЬНО** заменяем дефис на два дефиса! Если имя **VG** - **Debian-Otus**, то в файле **/boot/grub/grub.cfg** пишем **Debian--Otus**.
+```bash
+root@Otus-debian:~# cat /boot/grub/grub.cfg  | grep Otus
+        linux   /vmlinuz-6.1.0-31-amd64 root=/dev/mapper/Debian--Otus-root ro  quiet
+                linux   /vmlinuz-6.1.0-31-amd64 root=/dev/mapper/Debian--Otus-root ro  quiet
+                linux   /vmlinuz-6.1.0-31-amd64 root=/dev/mapper/Debian--Otus-root ro single
+                linux   /vmlinuz-6.1.0-30-amd64 root=/dev/mapper/Debian--Otus-root ro  quiet
+                linux   /vmlinuz-6.1.0-30-amd64 root=/dev/mapper/Debian--Otus-root ro single
+```
 
-2. Правим файл монтирования дисков **/etc/fstab** (если требуется).
+2. Правим файл монтирования дисков **/etc/fstab** (если требуется).  
 Заменяем старое название **VG** - **Otus-debian-vg** на новое **Debian-Otus** во всех местах где оно встречается.  
 В нашем случае правим монтирование для **/** и **swap**:
 ```bash
@@ -111,7 +119,7 @@ UUID=d7c791e2-0628-4b28-91d7-7eb4a6c48af9 /boot           ext2    defaults      
 /dev/mapper/Debian--Otus-swap_1 none            swap    sw              0       0
 ```
 
-3. Обновим **GRUB** и **initramfs**
+3. Обновим **GRUB** и **initramfs**.
 > root@Otus-debian:~# update-grub
 
 > root@Otus-debian:~# update-initramfs -u -k all
