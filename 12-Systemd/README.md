@@ -14,10 +14,10 @@
 
 ## Сервис мониторинга лога на нналичие ключевого слова
 
-####
-создаем файл с переменными для нашего сервиса (скрипта)
-root@Otus-debian:/etc/default# touch /etc/default/watchlog
+#### Создаем файл с переменными для нашего сервиса (скрипта)
+> root@Otus-debian:/etc/default# touch /etc/default/watchlog
 
+```bash
 root@Otus-debian:/etc/default# cat >> /etc/default/watchlog << EOF
 # Configuration file for my watchlog service
 # Place it to /etc/default
@@ -25,21 +25,21 @@ root@Otus-debian:/etc/default# cat >> /etc/default/watchlog << EOF
 WORD="ALERT"
 LOG="/var/log/watchlog.log"
 EOF
-
-где WORD="ALERT" ключевое слово
-LOG=/var/log/watchlog.log - где искать
-
-файл /var/log/watchlog.log заполняем случайными данными с использованием ключевего слова ALERT
-
-#### 
-создаем скрипт в директории /scripts
-создаем файл скрипта который должен быть с правами на выполнение
-root@Otus-debian:/scripts# touch check_log.sh
-root@Otus-debian:/scripts# chmod +x check_log.sh
-
-наполняем файл исполняемым кодом
 ```
-cat > /scripts/check_log.sh <<EOF
+Где **WORD="ALERT"** - ключевое слово  
+**LOG=/var/log/watchlog.log** - лог в котором ищем ключевое слово  
+
+Файл **/var/log/watchlog.log** заполняем случайными данными с использованием ключевего слова ALERT
+
+#### Создаем скрипт в директории /scripts
+Создаем файл скрипта который должен быть с правами на выполнение:
+> root@Otus-debian:/scripts# touch check_log.sh
+
+> root@Otus-debian:/scripts# chmod +x check_log.sh
+
+Записываем наш скрипт в файл **/scripts/check_log.sh**:
+```bash
+root@Otus-debian:/scripts# cat > /scripts/check_log.sh <<EOF
 #!/bin/bash
 
 # Проверка, переданы ли аргументы
@@ -69,18 +69,18 @@ else
 fi
 EOF
 ```
+Небольшие изменения:  
+- Добавлена проверка аргументов – если не передано 2 аргумента, выводится сообщение об использовании.  
+- Добавлена проверка существования файла – если файл не найден, скрипт выводит ошибку и завершает работу.  
+- Используются кавычки вокруг переменных – защита от пробелов в аргументах.  
+- Используется grep -q – ускоряет поиск, т.к. не выводит лишний текст.  
+- Вывод сообщений в терминал – теперь видно, найдено ли слово или нет.  
+- Логирование через logger – запись в системный журнал (/var/log/syslog).  
 
-Изменения от предложенного в методичке
-✅ Добавлена проверка аргументов – если не передано 2 аргумента, выводится сообщение об использовании.
-✅ Добавлена проверка существования файла – если файл не найден, скрипт выводит ошибку и завершает работу.
-✅ Используются кавычки вокруг переменных – защита от пробелов в аргументах.
-✅ Используется grep -q – ускоряет поиск, т.к. не выводит лишний текст.
-✅ Вывод сообщений в терминал – теперь видно, найдено ли слово или нет.
-✅ Логирование через logger – запись в системный журнал (/var/log/syslog).
-
-Создаем unit-файл для systemd
-root@Otus-debian:/scripts# touch /etc/systemd/system/check_log.service
-cat > /etc/systemd/system/check_log.service <<EOF
+#### Создаем unit-файл для systemd
+> root@Otus-debian:/scripts# touch /etc/systemd/system/check_log.service
+```bash
+root@Otus-debian:/scripts# cat > /etc/systemd/system/check_log.service <<EOF
 [Unit]
 Description=Log Monitoring Service
 After=network.target
@@ -96,14 +96,16 @@ StandardError=journal
 [Install]
 WantedBy=multi-user.target
 EOF
+```
 
-Type=oneshot → Если скрипт выполняется разово и завершает работу.
-Type=simple (по умолчанию) → Если сервис должен работать постоянно.
+**Type=oneshot** → Если скрипт выполняется разово и завершает работу.  
+**Type=simple (по умолчанию)** → Если сервис должен работать постоянно.  
 
-Создаём таймер (unit-файл check_log.timer)
-root@Otus-debian:/scripts# touch /etc/systemd/system/check_log.timer
+#### Создаём таймер (unit-файл check_log.timer) для запуска сервиса (запуск 1 раз в 30 секунд) 
+> root@Otus-debian:/scripts# touch /etc/systemd/system/check_log.timer
 
-cat > /etc/systemd/system/check_log.timer <<EOF
+```bash
+root@Otus-debian:/scripts# cat > /etc/systemd/system/check_log.timer <<EOF
 [Unit]
 Description=Timer to run check_log service every 30 seconds
 
@@ -114,30 +116,31 @@ OnUnitActiveSec=30
 [Install]
 WantedBy=timers.target
 EOF
+```
 
-OnBootSec=1min — первый запуск через 1 минуту после загрузки.
-OnUnitActiveSec=5min — затем запуск каждые 30 секунд.
+**OnBootSec=1min** — первый запуск через 1 минуту после загрузки.  
+**OnUnitActiveSec=30** — затем запуск каждые 30 секунд.  
+  
+В **systemd.timer** не нужно указывать **Unit=check_log.service**, потому что systemd автоматически связывает таймер с сервисом по его имени.  
+У таймера **check_log.timer** по умолчанию активируется сервис с таким же именем: check_log.service (то есть systemctl start check_log.timer запустит check_log.service).  
+Это правило работает автоматически и соответствует стандартной практике в systemd.  
+  
+Если таймер должен запускать другой сервис, тогда **Unit=** имеет смысл.  
+В 99% случаев лучше просто назвать таймер так же, как сервис (check_log.timer → check_log.service).  
 
-В systemd.timer не нужно указывать Unit=check_log.service, потому что systemd автоматически связывает таймер с сервисом по его имени.
-У таймера check_log.timer по умолчанию активируется сервис с таким же именем:
-check_log.service (то есть systemctl start check_log.timer запустит check_log.service).
-Это правило работает автоматически и соответствует стандартной практике в systemd.
+#### Перезагружаем systemd, включаем и запускаем таймер
+> root@Otus-debian:/scripts# systemctl daemon-reload
 
-Если таймер должен запускать другой сервис, тогда Unit= имеет смысл.
-В 99% случаев лучше просто назвать таймер так же, как сервис (check_log.timer → check_log.service).
-
-
-Перезагружаем systemd, включаем и запускаем таймер
-
-root@Otus-debian:/scripts# systemctl daemon-reload
-root@Otus-debian:/scripts# systemctl enable check_log.timer
+> root@Otus-debian:/scripts# systemctl enable check_log.timer
+```
 Created symlink /etc/systemd/system/timers.target.wants/check_log.timer → /etc/systemd/system/check_log.timer.
+```
+> root@Otus-debian:/scripts# systemctl start check_log.timer
 
-root@Otus-debian:/scripts# systemctl start check_log.timer
-
-5. Проверить статус сервиса
-
-root@Otus-debian:/scripts# systemctl status check_log.timer
+#### Проверим статус сервиса, таймера, посмотрим лог
+Посмотрим ствтус сервиса:
+> root@Otus-debian:/scripts# systemctl status check_log.timer
+```
 ● check_log.timer - Timer to run check_log service every 30 seconds
      Loaded: loaded (/etc/systemd/system/check_log.timer; enabled; preset: enabled)
      Active: active (waiting) since Tue 2025-02-18 17:41:57 MSK; 1min 35s ago
@@ -145,8 +148,9 @@ root@Otus-debian:/scripts# systemctl status check_log.timer
    Triggers: ● check_log.service
 
 Feb 18 17:41:57 Otus-debian systemd[1]: Started check_log.timer - Timer to run check_log service every 30 seconds.
-
-root@Otus-debian:/scripts# systemctl status check_log.service
+```
+> root@Otus-debian:/scripts# systemctl status check_log.service
+```
 ○ check_log.service - Log Monitoring Service
      Loaded: loaded (/etc/systemd/system/check_log.service; disabled; preset: enabled)
      Active: inactive (dead) since Tue 2025-02-18 17:43:32 MSK; 18s ago
@@ -160,18 +164,16 @@ Feb 18 17:43:32 Otus-debian check_log.sh[3526]: 2025-02-18 17:43:32: Found word 
 Feb 18 17:43:32 Otus-debian root[3529]: 2025-02-18 17:43:32: Found word 'ALERT' in '/var/log/watchlog.log'
 Feb 18 17:43:32 Otus-debian systemd[1]: check_log.service: Deactivated successfully.
 Feb 18 17:43:32 Otus-debian systemd[1]: Finished check_log.service - Log Monitoring Service.
-
-
-посмотрим статус таймера
-
-root@Otus-debian:/scripts# systemctl list-timers --all
+```
+Посмотрим статус таймера:
+> root@Otus-debian:/scripts# systemctl list-timers --all
+```
 NEXT                        LEFT          LAST                        PASSED     UNIT                         ACTIVATES
 Tue 2025-02-18 18:04:28 MSK 2s left       Tue 2025-02-18 18:03:58 MSK 27s ago    check_log.timer              check_log.service
-
-
-6. посмотрим Лог сервиса
-
-root@Otus-debian:/scripts# journalctl -u check_log.service -f
+```
+Посмотрим лог сервиса:
+> root@Otus-debian:/scripts# journalctl -u check_log.service -f
+```
 Feb 18 17:53:56 Otus-debian systemd[1]: check_log.service: Deactivated successfully.
 Feb 18 17:53:56 Otus-debian systemd[1]: Finished check_log.service - Log Monitoring Service.
 Feb 18 17:54:46 Otus-debian systemd[1]: Starting check_log.service - Log Monitoring Service...
@@ -186,17 +188,15 @@ Feb 18 17:57:06 Otus-debian systemd[1]: Starting check_log.service - Log Monitor
 Feb 18 17:57:06 Otus-debian check_log.sh[3676]: 2025-02-18 17:57:06: Found word 'ALERT' in '/var/log/watchlog.log'
 Feb 18 17:57:06 Otus-debian systemd[1]: check_log.service: Deactivated successfully.
 Feb 18 17:57:06 Otus-debian systemd[1]: Finished check_log.service - Log Monitoring Service.
+```
 
-
-### Установить spawn-fcgi и создать unit-файл (spawn-fcgi.sevice)
-
+## Установить spawn-fcgi и создать unit-файл (spawn-fcgi.sevice)
 Устанавливаем spawn-fcgi и необходимые для него пакеты:
+> root@Otus-debian:/scripts# apt install spawn-fcgi php php-cgi php-cli apache2 libapache2-mod-fcgid -y
 
-root@Otus-debian:/scripts# apt install spawn-fcgi php php-cgi php-cli apache2 libapache2-mod-fcgid -y
-
-создать файл с настройками для будущего сервиса в файле /scripts/fcgi.conf
-root@Otus-debian:/scripts# touch fcgi.conf
-
+Создаем файл с настройками для будущего сервиса в файле **/scripts/fcgi.conf**
+> root@Otus-debian:/scripts# touch fcgi.conf
+```bash
 root@Otus-debian:/scripts# cat > /scripts/fcgi.conf <<EOF
 # You must set some working options before the "spawn-fcgi" service will work.
 # If SOCKET points to a file, then this file is cleaned up by the init script.
@@ -207,9 +207,9 @@ root@Otus-debian:/scripts# cat > /scripts/fcgi.conf <<EOF
 SOCKET=/var/run/php-fcgi.sock
 OPTIONS="-u www-data -g www-data -s \$SOCKET -S -M 0600 -C 32 -F 1 -f /usr/bin/php-cgi"
 EOF
-
-Создаем unit-файл для systemd
-
+```
+#### Создаем unit-файл для systemd
+```bash
 root@Otus-debian:/scripts# cat > /etc/systemd/system/spawn-fcgi.service <<EOF
 [Unit]
 Description=Spawn-fcgi startup service by Otus
@@ -225,11 +225,15 @@ KillMode=process
 [Install]
 WantedBy=multi-user.target
 EOF
+```
 
-Убедимся чт овсе работает
-root@Otus-debian:/scripts# systemctl daemon-reload
-root@Otus-debian:/scripts# systemctl start spawn-fcgi
-root@Otus-debian:/scripts# systemctl status spawn-fcgi
+Запускаем сервис, првоеряем работоспособность:
+> root@Otus-debian:/scripts# systemctl daemon-reload
+
+> root@Otus-debian:/scripts# systemctl start spawn-fcgi
+
+> root@Otus-debian:/scripts# systemctl status spawn-fcgi
+```
 ● spawn-fcgi.service - Spawn-fcgi startup service by Otus
      Loaded: loaded (/etc/systemd/system/spawn-fcgi.service; disabled; preset: enabled)
      Active: active (running) since Wed 2025-02-19 10:42:32 MSK; 3s ago
@@ -273,15 +277,16 @@ root@Otus-debian:/scripts# systemctl status spawn-fcgi
              └─17811 /usr/bin/php-cgi
 
 Feb 19 10:42:32 Otus-debian systemd[1]: Started spawn-fcgi.service - Spawn-fcgi startup service by Otus.
+```
 
-### Доработать unit-файл Nginx (nginx.service) для запуска нескольких инстансов сервера с разными конфигурационными файлами одновременно
+## Доработать unit-файл Nginx (nginx.service) для запуска нескольких инстансов сервера с разными конфигурационными файлами одновременно
 
-установим nginx
-root@Otus-debian:/scripts# apt install nginx -y
+Установим nginx:
+> root@Otus-debian:/scripts# apt install nginx -y
 
-создадим новый Unit для работы с шаблонами 
-
-cat > /etc/systemd/system/nginx@.service <<EOF
+#### Cоздадим новый Unit для работы с шаблонами 
+```bash
+root@Otus-debian:/etc/nginx# cat > /etc/systemd/system/nginx@.service <<EOF
 # Stop dance for nginx
 # =======================
 #
@@ -312,10 +317,12 @@ KillMode=mixed
 [Install]
 WantedBy=multi-user.target
 EOF
+```
+#### Создадим два файла конфигурации (/etc/nginx/nginx-first.conf, /etc/nginx/nginx-second.conf) следующего вида
 
-создадим два файла конфигурации (/etc/nginx/nginx-first.conf, /etc/nginx/nginx-second.conf) следующего вида
-#### nginx-first.conf
-root@Otus-debian:/etc/nginx# cat nginx-first.conf
+Первый файл конфигурации Nginx - **nginx-first.conf**:
+> root@Otus-debian:/etc/nginx# cat nginx-first.conf
+```
 user www-data;
 worker_processes auto;
 pid /run/nginx-first.pid;
@@ -354,12 +361,11 @@ http {
                         try_files $uri $uri/ =404;
                 }
         }
-
 }
-
-#### 
-
-root@Otus-debian:/etc/nginx# cat nginx-second.conf
+```
+Второй файл конфигурации Nginx - **nginx-second.conf**:
+> root@Otus-debian:/etc/nginx# cat nginx-second.conf
+```
 user www-data;
 worker_processes auto;
 pid /run/nginx-second.pid;
@@ -398,14 +404,15 @@ http {
                         try_files $uri $uri/ =404;
                 }
         }
-
 }
+```
+#### Проверим работу сервисов Nginx
+> root@Otus-debian:/etc/nginx# systemctl daemon-reload
+Первый сервис Nginx:
+> root@Otus-debian:/etc/nginx# systemctl start nginx@first
 
-проверим работу
-root@Otus-debian:/etc/nginx# systemctl daemon-reload
-первый
-root@Otus-debian:/etc/nginx# systemctl start nginx@first
-root@Otus-debian:/etc/nginx# systemctl status nginx@first
+> root@Otus-debian:/etc/nginx# systemctl status nginx@first
+```
 ● nginx@first.service - A high performance web server and a reverse proxy server
      Loaded: loaded (/etc/systemd/system/nginx@.service; disabled; preset: enabled)
      Active: active (running) since Wed 2025-02-19 11:27:13 MSK; 4s ago
@@ -423,11 +430,12 @@ root@Otus-debian:/etc/nginx# systemctl status nginx@first
 
 Feb 19 11:27:13 Otus-debian systemd[1]: Starting nginx@first.service - A high performance web server and a reverse proxy server...
 Feb 19 11:27:13 Otus-debian systemd[1]: Started nginx@first.service - A high performance web server and a reverse proxy server.
+```
+Первый сервис Nginx:
+> root@Otus-debian:/etc/nginx# systemctl start nginx@second
 
-
-второй
-root@Otus-debian:/etc/nginx# systemctl start nginx@second
-root@Otus-debian:/etc/nginx# systemctl status nginx@second
+> root@Otus-debian:/etc/nginx# systemctl status nginx@second
+```
 ● nginx@second.service - A high performance web server and a reverse proxy server
      Loaded: loaded (/etc/systemd/system/nginx@.service; disabled; preset: enabled)
      Active: active (running) since Wed 2025-02-19 11:27:49 MSK; 6s ago
@@ -445,15 +453,18 @@ root@Otus-debian:/etc/nginx# systemctl status nginx@second
 
 Feb 19 11:27:49 Otus-debian systemd[1]: Starting nginx@second.service - A high performance web server and a reverse proxy server...
 Feb 19 11:27:49 Otus-debian systemd[1]: Started nginx@second.service - A high performance web server and a reverse proxy server.
+```
 
-Прослушиваемые порты
-root@Otus-debian:/etc/nginx# ss -tnulp | grep nginx
+Посмотрим какие порты слушаются в системе:
+> root@Otus-debian:/etc/nginx# ss -tnulp | grep nginx
+```
 tcp   LISTEN 0      511                              0.0.0.0:9998       0.0.0.0:*    users:(("nginx",pid=18808,fd=5),("nginx",pid=18807,fd=5),("nginx",pid=18806,fd=5))
 tcp   LISTEN 0      511                              0.0.0.0:9999       0.0.0.0:*    users:(("nginx",pid=18799,fd=5),("nginx",pid=18798,fd=5),("nginx",pid=18797,fd=5))
+```
 
-так же можно обратиться через браузер или curl
-
-root@Otus-debian:/etc/nginx# curl 10.126.112.216:9999
+Так же можно обратиться через браузер или **curl**:
+> root@Otus-debian:/etc/nginx# curl 10.126.112.216:9999
+```
 <!DOCTYPE html>
 <html>
 <head>
@@ -468,7 +479,9 @@ font-family: Tahoma, Verdana, Arial, sans-serif; }
     <h1>Welcome to nginx first</h1>
 </body>
 </html>
-root@Otus-debian:/etc/nginx# curl 10.126.112.216:9998
+```
+> root@Otus-debian:/etc/nginx# curl 10.126.112.216:9998
+```
 <!DOCTYPE html>
 <html>
 <head>
@@ -483,5 +496,5 @@ font-family: Tahoma, Verdana, Arial, sans-serif; }
     <h1>Welcome to nginx second</h1>
 </body>
 </html>
-
+```
 ![result](img/nginx01.png)
