@@ -29,7 +29,7 @@ EOF
 Где **WORD="ALERT"** - ключевое слово  
 **LOG=/var/log/watchlog.log** - лог в котором ищем ключевое слово  
 
-Файл **/var/log/watchlog.log** заполняем случайными данными с использованием ключевего слова ALERT
+Файл **/var/log/watchlog.log** заполняем случайными данными с использованием ключевего слова **ALERT**
 
 #### Создаем скрипт в директории /scripts
 Создаем файл скрипта который должен быть с правами на выполнение:
@@ -69,13 +69,13 @@ else
 fi
 EOF
 ```
-Небольшие изменения:  
+Небольшие изменения/описание:  
 - Добавлена проверка аргументов – если не передано 2 аргумента, выводится сообщение об использовании.  
 - Добавлена проверка существования файла – если файл не найден, скрипт выводит ошибку и завершает работу.  
 - Используются кавычки вокруг переменных – защита от пробелов в аргументах.  
-- Используется grep -q – ускоряет поиск, т.к. не выводит лишний текст.  
+- Используется **grep -q** – ускоряет поиск, т.к. не выводит лишний текст.  
 - Вывод сообщений в терминал – теперь видно, найдено ли слово или нет.  
-- Логирование через logger – запись в системный журнал (/var/log/syslog).  
+- Логирование через **logger** – запись в системный журнал (/var/log/syslog).  
 
 #### Создаем unit-файл для systemd
 > root@Otus-debian:/scripts# touch /etc/systemd/system/check_log.service
@@ -122,7 +122,7 @@ EOF
 **OnUnitActiveSec=30** — затем запуск каждые 30 секунд.  
   
 В **systemd.timer** не нужно указывать **Unit=check_log.service**, потому что systemd автоматически связывает таймер с сервисом по его имени.  
-У таймера **check_log.timer** по умолчанию активируется сервис с таким же именем: check_log.service (то есть systemctl start check_log.timer запустит check_log.service).  
+У таймера **check_log.timer** по умолчанию активируется сервис с таким же именем: **check_log.service** (то есть systemctl start check_log.timer запустит check_log.service).  
 Это правило работает автоматически и соответствует стандартной практике в systemd.  
   
 Если таймер должен запускать другой сервис, тогда **Unit=** имеет смысл.  
@@ -191,7 +191,7 @@ Feb 18 17:57:06 Otus-debian systemd[1]: Finished check_log.service - Log Monitor
 ```
 
 ## Установить spawn-fcgi и создать unit-файл (spawn-fcgi.sevice)
-Устанавливаем spawn-fcgi и необходимые для него пакеты:
+Устанавливаем **spawn-fcgi** и необходимые для него пакеты:
 > root@Otus-debian:/scripts# apt install spawn-fcgi php php-cgi php-cli apache2 libapache2-mod-fcgid -y
 
 Создаем файл с настройками для будущего сервиса в файле **/scripts/fcgi.conf**
@@ -204,7 +204,7 @@ root@Otus-debian:/scripts# cat > /scripts/fcgi.conf <<EOF
 # See spawn-fcgi(1) for all possible options.
 #
 # Example :
-SOCKET=/var/run/php-fcgi.sock
+SOCKET="/var/run/php-fcgi.sock"
 OPTIONS="-u www-data -g www-data -s \$SOCKET -S -M 0600 -C 32 -F 1 -f /usr/bin/php-cgi"
 EOF
 ```
@@ -227,7 +227,7 @@ WantedBy=multi-user.target
 EOF
 ```
 
-Запускаем сервис, првоеряем работоспособность:
+Запускаем сервис, проверяем работоспособность:
 > root@Otus-debian:/scripts# systemctl daemon-reload
 
 > root@Otus-debian:/scripts# systemctl start spawn-fcgi
@@ -281,7 +281,7 @@ Feb 19 10:42:32 Otus-debian systemd[1]: Started spawn-fcgi.service - Spawn-fcgi 
 
 ## Доработать unit-файл Nginx (nginx.service) для запуска нескольких инстансов сервера с разными конфигурационными файлами одновременно
 
-Установим nginx:
+Установим **Nginx**:
 > root@Otus-debian:/scripts# apt install nginx -y
 
 #### Cоздадим новый Unit для работы с шаблонами 
@@ -318,7 +318,7 @@ KillMode=mixed
 WantedBy=multi-user.target
 EOF
 ```
-#### Создадим два файла конфигурации (/etc/nginx/nginx-first.conf, /etc/nginx/nginx-second.conf) следующего вида
+#### Создадим два файла конфигурации (/etc/nginx/nginx-first.conf, /etc/nginx/nginx-second.conf)
 
 Первый файл конфигурации Nginx - **nginx-first.conf**:
 > root@Otus-debian:/etc/nginx# cat nginx-first.conf
@@ -406,9 +406,46 @@ http {
         }
 }
 ```
+В директорию **/var/www/htmlf** помещаем файл **index.html** следующего содержания:
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<title>nginx-first</title>
+<style>
+html { color-scheme: light dark; }
+body { width: 35em; margin: 0 auto;
+font-family: Tahoma, Verdana, Arial, sans-serif; }
+</style>
+</head>
+<body>
+    <h1>Welcome to nginx first</h1>
+</body>
+</html>
+```
+
+В директорию **/var/www/htmls** помещаем файл **index.html** следующего содержания:
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<title>nginx-second</title>
+<style>
+html { color-scheme: light dark; }
+body { width: 35em; margin: 0 auto;
+font-family: Tahoma, Verdana, Arial, sans-serif; }
+</style>
+</head>
+<body>
+    <h1>Welcome to nginx second</h1>
+</body>
+</html>
+```
+
 #### Проверим работу сервисов Nginx
 > root@Otus-debian:/etc/nginx# systemctl daemon-reload
-Первый сервис Nginx:
+
+Первый сервис **Nginx**:
 > root@Otus-debian:/etc/nginx# systemctl start nginx@first
 
 > root@Otus-debian:/etc/nginx# systemctl status nginx@first
@@ -431,7 +468,7 @@ http {
 Feb 19 11:27:13 Otus-debian systemd[1]: Starting nginx@first.service - A high performance web server and a reverse proxy server...
 Feb 19 11:27:13 Otus-debian systemd[1]: Started nginx@first.service - A high performance web server and a reverse proxy server.
 ```
-Первый сервис Nginx:
+Второй сервис **Nginx**:
 > root@Otus-debian:/etc/nginx# systemctl start nginx@second
 
 > root@Otus-debian:/etc/nginx# systemctl status nginx@second
