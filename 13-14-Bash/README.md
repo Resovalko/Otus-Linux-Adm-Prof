@@ -22,7 +22,7 @@
 
 > root@Otus-debian:/# chmod +x /scripts/web_log_analizer
 
-[Посмотреть скрипт] (web_log_analizer)
+[Посмотреть скрипт](https://github.com/Resovalko/Otus-Linux-Adm-Prof/blob/main/13-14-Bash/web_log_analizer)
 
 Будем работать с ломани **Nginx**, которые по умолчанию располагаются в **/var/log/nginx/access.log**
 
