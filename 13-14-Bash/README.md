@@ -113,9 +113,67 @@ HTTP Код Количество
 [[14/Aug/2019:08:21:48] 87.250.233.68   /                                                  404
 ...
 ```
+#### Добавим запись в **cron** что бы периодически выполнять скрипт и получать отчет
+> root@Otus-debian:/scripts# crontab -e
+
+Добавим строку:
+```
+0 * * * * /scripts/web_log_analizer > /scripts/web_log_analizer.log 2>&1
+```
+Скрипт будет выполняться каждый час и записывать небольшой лог.
+
+### Отправка отчета на внешний адрес электронной почты
+Если система настроена на отправку сообщений на внешние адреса электронной почты, то мы можем получать результаты работы скрипта не в кносоль, а на свой адрес электронной почты.  
+
+Нам потребуется **Postfix**:
+> root@Otus-debian:/scripts# apt install postfix postfix-pcre libsasl2-modules mailutils
+![postfix install](img/bash.png)
+
+#### Сконфигурируем Postfix
+Приведем файл [**/etc/postfix/main.cf**](https://github.com/Resovalko/Otus-Linux-Adm-Prof/blob/main/13-14-Bash/main.cf)к следующему виду:
+```
+# See /usr/share/postfix/main.cf.dist for a commented, more complete version
 
 
+# Debian specific:  Specifying a file name will cause the first
+# line of that file to be used as the name.  The Debian default
+# is /etc/mailname.
+#myorigin = /etc/mailname
 
+smtpd_banner = $myhostname ESMTP $mail_name (Debian/GNU)
+biff = no
+
+# appending .domain is the MUA's job.
+append_dot_mydomain = no
+
+# Uncomment the next line to generate "delayed mail" warnings
+#delay_warning_time = 4h
+
+#readme_directory = no
+
+# See http://www.postfix.org/COMPATIBILITY_README.html -- default to 3.6 on
+# fresh installs.
+compatibility_level = 3.6
+
+myhostname = Otus-debian.lan
+alias_maps = hash:/etc/aliases
+alias_database = hash:/etc/aliases
+mydestination = $myhostname, Otus-debian, localhost.localdomain, localhost
+mynetworks = 127.0.0.0/8
+recipient_delimiter = +
+inet_interfaces = loopback-only
+
+#google mail
+relayhost = smtp.gmail.com:587
+smtp_use_tls = yes
+smtp_sasl_auth_enable = yes
+smtp_sasl_security_options = noanonymous
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+smtp_tls_CAfile = /etc/ssl/certs/Entrust_Root_Certification_Authority.pem
+smtp_tls_session_cache_database = btree:/var/lib/postfix/smtp_tls_session_cache
+smtp_tls_session_cache_timeout = 3600s
+smtp_header_checks = pcre:/etc/postfix/smtp_header_checks
+```
 
 
 
