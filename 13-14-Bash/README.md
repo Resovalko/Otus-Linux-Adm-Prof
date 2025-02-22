@@ -122,15 +122,15 @@ HTTP Код Количество
 ```
 Скрипт будет выполняться каждый час и записывать небольшой лог.
 
-### Отправка отчета на внешний адрес электронной почты
+### Отправка отчета на внешний адрес электронной почты (на примере gmail)
 Если система настроена на отправку сообщений на внешние адреса электронной почты, то мы можем получать результаты работы скрипта не в кносоль, а на свой адрес электронной почты.  
 
 Нам потребуется **Postfix**:
 > root@Otus-debian:/scripts# apt install postfix postfix-pcre libsasl2-modules mailutils
-![postfix install](img/bash.png)
+![postfix install](img/bash01.png)
 
 #### Сконфигурируем Postfix
-Приведем файл [**/etc/postfix/main.cf**](https://github.com/Resovalko/Otus-Linux-Adm-Prof/blob/main/13-14-Bash/main.cf)к следующему виду:
+Приведем файл [**/etc/postfix/main.cf**](https://github.com/Resovalko/Otus-Linux-Adm-Prof/blob/main/13-14-Bash/main.cf) к следующему виду:
 ```
 # See /usr/share/postfix/main.cf.dist for a commented, more complete version
 
@@ -174,11 +174,37 @@ smtp_tls_session_cache_database = btree:/var/lib/postfix/smtp_tls_session_cache
 smtp_tls_session_cache_timeout = 3600s
 smtp_header_checks = pcre:/etc/postfix/smtp_header_checks
 ```
+**Создадим файл с логином и паролем для SMTP:**
+> root@Otus-debian:/scripts# echo "smtp.gmail.com your-email@gmail.com:YourAppPassword" > /etc/postfix/sasl_passwd
 
+> root@Otus-debian:/scripts# postmap hash:/etc/postfix/sasl_passwd
 
+> root@Otus-debian:/scripts# chmod 600 /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.db
 
+> root@Otus-debian:/scripts# nano /etc/postfix/smtp_header_checks
+Добавим сюда такую запись:
+```
+/^From:.*/ REPLACE From: Otus.bash otus.bash@something.com
+```
+> root@Otus-debian:/scripts# postmap hash:/etc/postfix/smtp_header_checks
 
+> root@Otus-debian:/scripts# systemctl restart postfix
 
+Отредактируем файл **/etc/aliases**:
+> root@Otus-debian:/scripts#  nano /etc/aliases
+Ищем строку, начинающуюся с root: и изменяем её (либо добавляем строку, если её нет):
+```
+root: yourusername@gmail.com
+```
+И применим изменения:
+> root@Otus-debian:/scripts# newaliases
+
+**Проверить можем отправив тестовое письмо:**
+> root@Otus-debian:/scripts#  echo "Test message" | mail -s "Test Subject" yourusername@gmail.com
+
+#### Если все сделано правильно, в результате работы скрипта мы должны получить письмо на тот электронный адрес, который указали в конфигах
+
+![mail report](img/bash02.png)
 
 <!-- ```bash
 root@Otus-debian:/etc/default# cat >> /etc/default/watchlog << EOF
