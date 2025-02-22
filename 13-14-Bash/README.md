@@ -127,6 +127,7 @@ HTTP Код Количество
 
 Нам потребуется **Postfix**:
 > root@Otus-debian:/scripts# apt install postfix postfix-pcre libsasl2-modules mailutils
+
 ![postfix install](img/bash01.png)
 
 #### Сконфигурируем Postfix
@@ -182,6 +183,7 @@ smtp_header_checks = pcre:/etc/postfix/smtp_header_checks
 > root@Otus-debian:/scripts# chmod 600 /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.db
 
 > root@Otus-debian:/scripts# nano /etc/postfix/smtp_header_checks
+
 Добавим сюда такую запись:
 ```
 /^From:.*/ REPLACE From: Otus.bash otus.bash@something.com
@@ -192,7 +194,8 @@ smtp_header_checks = pcre:/etc/postfix/smtp_header_checks
 
 Отредактируем файл **/etc/aliases**:
 > root@Otus-debian:/scripts#  nano /etc/aliases
-Ищем строку, начинающуюся с root: и изменяем её (либо добавляем строку, если её нет):
+
+Ищем строку, начинающуюся с root: и изменяем её (либо добавляем строку, если её нет) указывая адрес почты на который хотим получать письма для **root**:
 ```
 root: yourusername@gmail.com
 ```
