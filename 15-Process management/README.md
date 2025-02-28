@@ -14,7 +14,7 @@
 
 ## Скрипт выводит информацию о процессах используя анализ директории /proc
 
-Скрипт [process_list_proc.sh]("https://github.com/Resovalko/Otus-Linux-Adm-Prof/blob/main/15-Process management/process_list_proc.sh") выводит информацию о процесах в системе, используя данные из директории **/proc**
+Скрипт [process_list_proc.sh](proc.sh) выводит информацию о процесах в системе, используя данные из директории **/proc**
 
 #### Пример вывода данных при запуске скрипта
 ```
