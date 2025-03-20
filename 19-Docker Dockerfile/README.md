@@ -24,7 +24,7 @@
 
 ### Кастомный образ nginx
 
-На базе **debian:bookworm-slim** создан [кастомный образ](https://github.com/Resovalko/Otus-Linux-Adm-Prof/blob/main/19-Docker%20Dockerfile/Dockerfile") **nginx**  
+На базе **debian:bookworm-slim** создан [кастомный образ](https://github.com/Resovalko/Otus-Linux-Adm-Prof/blob/main/19-Docker%20Dockerfile/Dockerfile) **nginx**  
 
 - web сервис работает на портах **https - 80** и **https - 5432**
 - настроен редирект с **http** на **https**
